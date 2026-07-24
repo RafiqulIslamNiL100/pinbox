@@ -5,6 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Pinbox.Services;
 using Pinbox.Views;
 
 namespace Pinbox;
@@ -24,6 +25,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            ThemeService.Apply(AppSettingsService.Load().Theme);
             _mainWindow = new MainWindow();
             desktop.MainWindow = _mainWindow;
             _mainWindow.Show();

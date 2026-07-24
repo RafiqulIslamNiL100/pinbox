@@ -11,6 +11,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Pinbox.Models;
 using Pinbox.Services;
@@ -37,6 +38,8 @@ public partial class MainView : UserControl
     }
 
     public void Initialize(Window owner) => _owner = owner;
+
+    private IBrush? Brush(string key) => this.TryFindResource(key, out var v) ? v as IBrush : null;
 
     public void EnterAs(AuthSession session)
     {
@@ -76,8 +79,8 @@ public partial class MainView : UserControl
             {
                 Padding = new Thickness(10, 6),
                 CornerRadius = new CornerRadius(7),
-                Background = isActive ? (IBrush?)Application.Current!.Resources["SurfaceBrush"] : null,
-                BorderBrush = isActive ? (IBrush?)Application.Current!.Resources["BorderBrush2"] : null,
+                Background = isActive ? Brush("SurfaceBrush") : null,
+                BorderBrush = isActive ? Brush("BorderBrush2") : null,
                 BorderThickness = new Thickness(isActive ? 1 : 0),
                 Cursor = new Cursor(StandardCursorType.Hand),
             };
@@ -87,14 +90,14 @@ public partial class MainView : UserControl
                 Text = page.Name,
                 FontSize = 12,
                 FontWeight = FontWeight.SemiBold,
-                Foreground = isActive ? (IBrush?)Application.Current!.Resources["TextBrush"] : (IBrush?)Application.Current!.Resources["TextDimBrush"],
+                Foreground = isActive ? Brush("TextBrush") : Brush("TextDimBrush"),
                 VerticalAlignment = VerticalAlignment.Center,
             });
             stack.Children.Add(new TextBlock
             {
                 Text = page.Items.Count.ToString(),
                 FontSize = 10,
-                Foreground = (IBrush?)Application.Current!.Resources["TextDimBrush"],
+                Foreground = Brush("TextDimBrush"),
                 VerticalAlignment = VerticalAlignment.Center,
             });
             border.Child = stack;
@@ -190,6 +193,26 @@ public partial class MainView : UserControl
 
     private void OnSearchChanged(object? sender, TextChangedEventArgs e) => RenderItems();
 
+    private void OnSearchFocus(object? sender, GotFocusEventArgs e)
+    {
+        SearchBoxBorder.BorderBrush = Brush("AccentBrush");
+        if (Brush("AccentBrush") is SolidColorBrush accent)
+        {
+            var c = accent.Color;
+            SearchBoxBorder.BoxShadow = new BoxShadows(new BoxShadow
+            {
+                OffsetX = 0, OffsetY = 0, Blur = 0, Spread = 3,
+                Color = Color.FromArgb(46, c.R, c.G, c.B),
+            });
+        }
+    }
+
+    private void OnSearchUnfocus(object? sender, RoutedEventArgs e)
+    {
+        SearchBoxBorder.BorderBrush = Brush("BorderBrush2");
+        SearchBoxBorder.BoxShadow = default;
+    }
+
     private void RenderItems()
     {
         ItemList.Children.Clear();
@@ -227,7 +250,7 @@ public partial class MainView : UserControl
             ItemList.Children.Add(new TextBlock
             {
                 Text = Loc.Lang == "zh" ? "还没有保存的项目。" : "No saved items yet.",
-                Foreground = (IBrush?)Application.Current!.Resources["TextDimBrush"],
+                Foreground = Brush("TextDimBrush"),
                 FontSize = 13,
                 Margin = new Thickness(10, 40),
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -238,25 +261,31 @@ public partial class MainView : UserControl
         UpdateBulkBar();
     }
 
-    private static TextBlock SectionLabel(string text) => new()
+    private TextBlock SectionLabel(string text) => new()
     {
         Text = text,
         FontSize = 10.5,
         FontWeight = FontWeight.Bold,
-        Foreground = (IBrush?)Application.Current!.Resources["TextDimBrush"],
+        Foreground = Brush("TextDimBrush"),
         Margin = new Thickness(8, 10, 8, 4),
     };
 
     private Border BuildRow(PinboxPage page, PinboxItem item)
     {
-        var textBrush = (IBrush?)Application.Current!.Resources["TextBrush"];
-        var textDim = (IBrush?)Application.Current!.Resources["TextDimBrush"];
-        var surface2 = (IBrush?)Application.Current!.Resources["Surface2Brush"];
-        var accentSoft = (IBrush?)Application.Current!.Resources["AccentSoftBrush"];
-        var accentInk = (IBrush?)Application.Current!.Resources["AccentInkBrush"];
-        var gold = (IBrush?)Application.Current!.Resources["GoldBrush"];
+        var textBrush = Brush("TextBrush");
+        var textDim = Brush("TextDimBrush");
+        var textFaint = Brush("TextFaintBrush") ?? textDim;
+        var surface2 = Brush("Surface2Brush");
+        var surface3 = Brush("Surface3Brush") ?? surface2;
+        var accentSoft = Brush("AccentSoftBrush");
+        var accentInk = Brush("AccentInkBrush");
+        var accent = Brush("AccentBrush");
+        var gold = Brush("GoldBrush");
+        var mauve = Brush("MauveBrush");
 
-        var root = new Border { CornerRadius = new CornerRadius(9), Padding = new Thickness(8), Cursor = new Cursor(StandardCursorType.Hand) };
+        // compact, single-line row: icon, subject + trimmed preview, then
+        // either label chips (at rest) or quick actions (on hover) on the right.
+        var root = new Border { CornerRadius = new CornerRadius(8), Padding = new Thickness(7, 5), Cursor = new Cursor(StandardCursorType.Hand) };
         var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,Auto,*,Auto") };
 
         // leading control: checkbox (multi-select) or star (normal)
@@ -266,12 +295,12 @@ public partial class MainView : UserControl
             var isSelected = _selectedIds.Contains(item.Id);
             leading = new Border
             {
-                Width = 16, Height = 16, CornerRadius = new CornerRadius(4),
+                Width = 15, Height = 15, CornerRadius = new CornerRadius(4),
                 Background = isSelected ? accentSoft : null,
-                BorderBrush = (IBrush?)Application.Current!.Resources["BorderBrush2"],
+                BorderBrush = Brush("BorderBrush2"),
                 BorderThickness = new Thickness(1.3),
-                Margin = new Thickness(0, 9, 0, 0),
-                Child = isSelected ? new TextBlock { Text = "✓", FontSize = 10, Foreground = accentInk, HorizontalAlignment = HorizontalAlignment.Center } : null,
+                VerticalAlignment = VerticalAlignment.Center,
+                Child = isSelected ? new TextBlock { Text = "✓", FontSize = 9, Foreground = accentInk, HorizontalAlignment = HorizontalAlignment.Center } : null,
             };
         }
         else
@@ -279,9 +308,9 @@ public partial class MainView : UserControl
             leading = new TextBlock
             {
                 Text = item.IsFavorite ? "★" : "☆",
-                Foreground = item.IsFavorite ? gold : textDim,
-                FontSize = 13,
-                Margin = new Thickness(0, 8, 0, 0),
+                Foreground = item.IsFavorite ? gold : textFaint,
+                FontSize = 12,
+                VerticalAlignment = VerticalAlignment.Center,
                 Cursor = new Cursor(StandardCursorType.Hand),
             };
         }
@@ -291,7 +320,7 @@ public partial class MainView : UserControl
         Control typeIcon;
         if (item.Type == ItemType.Picture)
         {
-            var img = new Border { Width = 34, Height = 34, CornerRadius = new CornerRadius(8), ClipToBounds = true, Background = surface2 };
+            var img = new Border { Width = 24, Height = 24, CornerRadius = new CornerRadius(6), ClipToBounds = true, Background = surface3, VerticalAlignment = VerticalAlignment.Center };
             if (_revealPictures && item.ImageFileName != null && _session != null)
             {
                 try
@@ -307,7 +336,7 @@ public partial class MainView : UserControl
             }
             else
             {
-                img.Child = new TextBlock { Text = "🔒", FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+                img.Child = new TextBlock { Text = "🔒", FontSize = 10, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
             }
             typeIcon = img;
         }
@@ -315,68 +344,90 @@ public partial class MainView : UserControl
         {
             typeIcon = new Border
             {
-                Width = 34, Height = 34, CornerRadius = new CornerRadius(8), Background = accentSoft,
-                Child = new TextBlock { Text = "Aa", FontSize = 13, Foreground = accentInk, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center },
+                Width = 24, Height = 24, CornerRadius = new CornerRadius(6), Background = accentSoft,
+                VerticalAlignment = VerticalAlignment.Center,
+                Child = new TextBlock { Text = "Aa", FontSize = 10, Foreground = accent, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center },
             };
         }
         Grid.SetColumn(typeIcon, 1);
-        typeIcon.Margin = new Thickness(9, 0, 0, 0);
+        typeIcon.Margin = new Thickness(8, 0, 0, 0);
 
-        // body
-        var body = new StackPanel { Margin = new Thickness(9, 0, 0, 0) };
-        var topLine = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6 };
-        topLine.Children.Add(new TextBlock { Text = item.Subject, FontSize = 13, FontWeight = FontWeight.SemiBold, Foreground = textBrush });
+        // body: subject (bold, natural width) + preview (dim, trimmed to whatever's left) on one line
+        var body = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*"), Margin = new Thickness(8, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center };
+        var subjectText = new TextBlock
+        {
+            Text = item.Subject, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = textBrush,
+            VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0),
+        };
+        Grid.SetColumn(subjectText, 0);
+
+        var previewSource = item.Type == ItemType.Picture ? (item.ImageFileName ?? "") : item.Text;
+        var previewBlock = new TextBlock
+        {
+            Text = previewSource.Replace('\n', ' '), FontSize = 11.5, Foreground = textFaint,
+            TextTrimming = TextTrimming.CharacterEllipsis, MaxLines = 1, VerticalAlignment = VerticalAlignment.Center,
+        };
+        Grid.SetColumn(previewBlock, 1);
+
+        body.Children.Add(subjectText);
+        body.Children.Add(previewBlock);
+        Grid.SetColumn(body, 2);
+
+        // right side: label chips at rest, quick actions on hover (same cell, one visible at a time)
+        var metaPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5, VerticalAlignment = VerticalAlignment.Center };
         foreach (var label in item.Labels)
         {
-            topLine.Children.Add(new Border
+            metaPanel.Children.Add(new Border
             {
-                Background = surface2, CornerRadius = new CornerRadius(20), Padding = new Thickness(7, 1),
+                Background = surface3, CornerRadius = new CornerRadius(20), Padding = new Thickness(7, 2),
                 Child = new TextBlock { Text = label, FontSize = 9.5, FontWeight = FontWeight.Bold, Foreground = textDim },
             });
         }
-        body.Children.Add(topLine);
 
-        var previewText = item.Type == ItemType.Picture ? (item.ImageFileName ?? "") : item.Text;
-        body.Children.Add(new TextBlock
-        {
-            Text = previewText, FontSize = 11.5, Foreground = textDim, FontFamily = new FontFamily("Consolas"),
-            TextTrimming = TextTrimming.CharacterEllipsis, MaxLines = 1,
-        });
-
-        if (item.UsageCount > 0)
-        {
-            body.Children.Add(new TextBlock
-            {
-                Text = $"Used {item.UsageCount} time{(item.UsageCount == 1 ? "" : "s")}",
-                FontSize = 10, Foreground = textDim, Margin = new Thickness(0, 2, 0, 0),
-            });
-        }
-        Grid.SetColumn(body, 2);
-
-        // actions
-        var actions = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 9, VerticalAlignment = VerticalAlignment.Center, IsVisible = !_multiSelect };
+        var actionsPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 9, VerticalAlignment = VerticalAlignment.Center, IsVisible = false };
         var editText = new TextBlock { Text = Loc.T("edit"), FontSize = 11, FontWeight = FontWeight.SemiBold, Foreground = textDim, Cursor = new Cursor(StandardCursorType.Hand) };
         var dupText = new TextBlock { Text = Loc.T("duplicate"), FontSize = 11, FontWeight = FontWeight.SemiBold, Foreground = textDim, Cursor = new Cursor(StandardCursorType.Hand) };
-        var delText = new TextBlock { Text = Loc.T("delete"), FontSize = 11, FontWeight = FontWeight.SemiBold, Foreground = (IBrush?)Application.Current!.Resources["DangerBrush"], Cursor = new Cursor(StandardCursorType.Hand) };
-        actions.Children.Add(editText);
-        actions.Children.Add(dupText);
-        actions.Children.Add(delText);
-        Grid.SetColumn(actions, 3);
+        var delText = new TextBlock { Text = Loc.T("delete"), FontSize = 11, FontWeight = FontWeight.SemiBold, Foreground = mauve, Cursor = new Cursor(StandardCursorType.Hand) };
+        if (!_multiSelect)
+        {
+            actionsPanel.Children.Add(editText);
+            actionsPanel.Children.Add(dupText);
+            actionsPanel.Children.Add(delText);
+        }
+
+        var swap = new Grid();
+        swap.Children.Add(metaPanel);
+        swap.Children.Add(actionsPanel);
+        Grid.SetColumn(swap, 3);
 
         grid.Children.Add(leading);
         grid.Children.Add(typeIcon);
         grid.Children.Add(body);
-        grid.Children.Add(actions);
+        grid.Children.Add(swap);
         root.Child = grid;
 
         if (_selectedIds.Contains(item.Id)) root.Background = accentSoft;
 
-        root.PointerEntered += (_, _) => { if (!_selectedIds.Contains(item.Id)) root.Background = surface2; };
-        root.PointerExited += (_, _) => { if (!_selectedIds.Contains(item.Id)) root.Background = null; };
+        root.PointerEntered += (_, _) =>
+        {
+            if (!_selectedIds.Contains(item.Id)) root.Background = surface2;
+            if (!_multiSelect) { metaPanel.IsVisible = false; actionsPanel.IsVisible = true; }
+        };
+        root.PointerExited += (_, _) =>
+        {
+            if (!_selectedIds.Contains(item.Id)) root.Background = null;
+            metaPanel.IsVisible = true;
+            actionsPanel.IsVisible = false;
+        };
+
+        root.ContextMenu = BuildItemContextMenu(page, item);
 
         root.PointerPressed += async (_, e) =>
         {
             if (e.Source is Control c && (c == editText || c == dupText || c == delText)) return;
+            // Right-click (and anything but the primary button) only opens the
+            // context menu above - it must never trigger a send.
+            if (!e.GetCurrentPoint(root).Properties.IsLeftButtonPressed) return;
 
             if (_multiSelect)
             {
@@ -386,7 +437,7 @@ public partial class MainView : UserControl
                 return;
             }
 
-            if (e.GetCurrentPoint(root).Properties.IsLeftButtonPressed && leading == e.Source)
+            if (leading == e.Source)
             {
                 _pages = PageStore.ToggleFavorite(_session!.UserId, page.Id, item.Id);
                 RenderItems();
@@ -411,6 +462,100 @@ public partial class MainView : UserControl
         };
 
         return root;
+    }
+
+    private ContextMenu BuildItemContextMenu(PinboxPage page, PinboxItem item)
+    {
+        var menu = new ContextMenu();
+        var items = new List<object>();
+
+        var view = new MenuItem { Header = Loc.T("view") };
+        view.Click += (_, _) => ViewItem(item);
+        var edit = new MenuItem { Header = Loc.T("edit") };
+        edit.Click += (_, _) => OpenEditItem(page, item);
+        var copy = new MenuItem { Header = Loc.T("copy") };
+        copy.Click += async (_, _) => await CopyItemAsync(item);
+        var duplicate = new MenuItem { Header = Loc.T("duplicate") };
+        duplicate.Click += (_, _) =>
+        {
+            _pages = PageStore.DuplicateItem(_session!.UserId, page.Id, item.Id);
+            RenderItems();
+        };
+        var moveUp = new MenuItem { Header = Loc.T("move_up") };
+        moveUp.Click += (_, _) =>
+        {
+            _pages = PageStore.ReorderItem(_session!.UserId, page.Id, item.Id, -1);
+            RenderItems();
+        };
+        var moveDown = new MenuItem { Header = Loc.T("move_down") };
+        moveDown.Click += (_, _) =>
+        {
+            _pages = PageStore.ReorderItem(_session!.UserId, page.Id, item.Id, 1);
+            RenderItems();
+        };
+        var delete = new MenuItem { Header = Loc.T("delete") };
+        delete.Click += (_, _) =>
+        {
+            _pages = PageStore.DeleteItem(_session!.UserId, page.Id, item.Id);
+            RenderItems();
+        };
+
+        items.Add(view);
+        items.Add(edit);
+        items.Add(copy);
+        items.Add(duplicate);
+        items.Add(new Separator());
+        items.Add(moveUp);
+        items.Add(moveDown);
+        items.Add(new Separator());
+        items.Add(delete);
+
+        menu.ItemsSource = items;
+        return menu;
+    }
+
+    private void ViewItem(PinboxItem item)
+    {
+        if (item.Type == ItemType.Picture && item.ImageFileName != null && _session != null)
+        {
+            try
+            {
+                var path = PageStore.GetImagePath(_session.UserId, item.ImageFileName);
+                if (File.Exists(path))
+                    Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
+            }
+            catch { /* non-fatal - just can't preview right now */ }
+        }
+        else
+        {
+            new ViewItemWindow(item.Subject, item.Text).Show(_owner);
+        }
+    }
+
+    private async Task CopyItemAsync(PinboxItem item)
+    {
+        if (_owner?.Clipboard is null) return;
+        try
+        {
+            if (item.Type == ItemType.Picture && item.ImageFileName != null && _session != null)
+            {
+                var path = PageStore.GetImagePath(_session.UserId, item.ImageFileName);
+                var topLevel = TopLevel.GetTopLevel(_owner);
+                var file = topLevel is not null ? await topLevel.StorageProvider.TryGetFileFromPathAsync(path) : null;
+                var data = new DataObject();
+                if (file is not null) data.Set(DataFormats.Files, new List<IStorageItem> { file });
+                await _owner.Clipboard.SetDataObjectAsync(data);
+            }
+            else
+            {
+                await _owner.Clipboard.SetTextAsync(item.Text);
+            }
+            Flash($"Copied \"{item.Subject}\"", false);
+        }
+        catch (Exception ex)
+        {
+            Flash(ex.Message, true);
+        }
     }
 
     private async Task SendItemAsync(PinboxPage page, PinboxItem item)
@@ -454,9 +599,7 @@ public partial class MainView : UserControl
         var token = _flashCts.Token;
 
         FlashText.Text = text;
-        FlashText.Foreground = isError
-            ? (IBrush?)Application.Current!.Resources["DangerBrush"]
-            : (IBrush?)Application.Current!.Resources["AccentInkBrush"];
+        FlashText.Foreground = isError ? Brush("MauveBrush") : Brush("AccentInkBrush");
         FlashToast.IsVisible = true;
 
         _ = Task.Delay(2500, token).ContinueWith(t =>
@@ -546,6 +689,7 @@ public partial class MainView : UserControl
         dlg.SignOutRequested += (_, _) => SignedOut?.Invoke(this, EventArgs.Empty);
         dlg.HotkeysChanged += (_, _) => PageHotkeysChanged?.Invoke(this, EventArgs.Empty);
         await dlg.ShowDialog(_owner);
+        RenderPageTabs();
         RenderItems();
     }
 }

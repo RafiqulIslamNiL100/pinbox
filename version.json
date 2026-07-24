@@ -1,4 +1,4 @@
 {
-  "version": "2.0.0",
-  "notes": "Major update: licensed activation-key system (paid app), multi-page saved-item lists with text and picture items, favorites, labels, search, usage stats, drag-and-drop image support, bilingual English/Chinese interface, PIN auto-lock, backup/export/import, and an admin dashboard for issuing keys and managing users."
+  "version": "2.0.1",
+  "notes": "Redesign: denser purple-only interface, a working right-click menu (view/edit/copy/duplicate/move/delete), one-click send that pastes and auto-submits, modern toggle and segmented controls in Settings, real Light/Dark/System theming, and a fix for Pinbox disappearing after sending."
 }

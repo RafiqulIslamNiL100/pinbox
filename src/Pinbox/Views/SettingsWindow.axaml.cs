@@ -25,17 +25,27 @@ public partial class SettingsWindow : Window
         _settings = AppSettingsService.Load();
 
         HotkeyBox.Text = _settings.GlobalHotkey;
-        AutoStartCheck.IsChecked = _settings.StartWithWindows;
-        CompactCheck.IsChecked = _settings.CompactModeDefault;
-        NotifCheck.IsChecked = _settings.NotificationsEnabled;
-        ThemeCombo.SelectedIndex = _settings.Theme switch { "Light" => 0, "Dark" => 1, _ => 2 };
+        AutoStartToggle.IsChecked = _settings.StartWithWindows;
+        CompactToggle.IsChecked = _settings.CompactModeDefault;
+        NotifToggle.IsChecked = _settings.NotificationsEnabled;
+        switch (_settings.Theme)
+        {
+            case "Light": ThemeLightBtn.IsChecked = true; break;
+            case "Dark": ThemeDarkBtn.IsChecked = true; break;
+            default: ThemeSystemBtn.IsChecked = true; break;
+        }
 
         AccountEmail.Text = session.Email;
         LicenseDesc.Text = "Managed by your activation key";
 
         LangEnBtn.IsChecked = Loc.Lang != "zh";
         LangZhBtn.IsChecked = Loc.Lang == "zh";
-        AutoLockCombo.SelectedIndex = _settings.AutoLockMinutes switch { 5 => 1, 15 => 2, _ => 0 };
+        switch (_settings.AutoLockMinutes)
+        {
+            case 5: AutoLock5Btn.IsChecked = true; break;
+            case 15: AutoLock15Btn.IsChecked = true; break;
+            default: AutoLockOffBtn.IsChecked = true; break;
+        }
     }
 
     private void OnGeneralTabClick(object? sender, RoutedEventArgs e)
@@ -60,13 +70,14 @@ public partial class SettingsWindow : Window
         var hotkeyChanged = newHotkey != _settings.GlobalHotkey;
 
         _settings.GlobalHotkey = newHotkey;
-        _settings.StartWithWindows = AutoStartCheck.IsChecked == true;
-        _settings.CompactModeDefault = CompactCheck.IsChecked == true;
-        _settings.NotificationsEnabled = NotifCheck.IsChecked == true;
-        _settings.Theme = ThemeCombo.SelectedIndex switch { 0 => "Light", 1 => "Dark", _ => "System" };
+        _settings.StartWithWindows = AutoStartToggle.IsChecked == true;
+        _settings.CompactModeDefault = CompactToggle.IsChecked == true;
+        _settings.NotificationsEnabled = NotifToggle.IsChecked == true;
+        _settings.Theme = ThemeDarkBtn.IsChecked == true ? "Dark" : ThemeLightBtn.IsChecked == true ? "Light" : "System";
 
         AppSettingsService.Save(_settings);
         AppSettingsService.SetStartWithWindows(_settings.StartWithWindows);
+        ThemeService.Apply(_settings.Theme);
 
         if (hotkeyChanged) HotkeysChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -87,7 +98,7 @@ public partial class SettingsWindow : Window
 
     private void OnSaveAccount(object? sender, RoutedEventArgs e)
     {
-        _settings.AutoLockMinutes = AutoLockCombo.SelectedIndex switch { 1 => 5, 2 => 15, _ => 0 };
+        _settings.AutoLockMinutes = AutoLock15Btn.IsChecked == true ? 15 : AutoLock5Btn.IsChecked == true ? 5 : 0;
         if (!string.IsNullOrWhiteSpace(PinBox.Text))
             AppSettingsService.SetPin(_settings, PinBox.Text.Trim());
         AppSettingsService.Save(_settings);

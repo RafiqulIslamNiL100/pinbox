@@ -15,7 +15,7 @@
 
     <TextBox x:Name="PinInput" PasswordChar="•" MaxLength="6" HorizontalContentAlignment="Center" FontSize="18" Margin="0,0,0,8" KeyDown="OnKeyDown"/>
 
-    <TextBlock x:Name="ErrorText" Foreground="{DynamicResource DangerBrush}" FontSize="11.5" IsVisible="False" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+    <TextBlock x:Name="ErrorText" Foreground="{DynamicResource MauveBrush}" FontSize="11.5" IsVisible="False" HorizontalAlignment="Center" Margin="0,0,0,6"/>
 
     <Button Content="Unlock" Click="OnUnlockClick" HorizontalAlignment="Stretch" Padding="0,10"
             Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}" FontWeight="SemiBold"/>

@@ -72,6 +72,8 @@ public partial class AddEditItemWindow : Window
     private void OnTextTypeClick(object? sender, RoutedEventArgs e) => SetMode(false);
     private void OnPicTypeClick(object? sender, RoutedEventArgs e) => SetMode(true);
 
+    private IBrush? Brush(string key) => this.TryFindResource(key, out var v) ? v as IBrush : null;
+
     private void RenderLabelChips()
     {
         LabelsPanel.Children.Clear();
@@ -80,8 +82,8 @@ public partial class AddEditItemWindow : Window
             var isSel = _selectedLabels.Contains(label);
             var chip = new Border
             {
-                Background = isSel ? (IBrush?)Application.Current!.Resources["AccentSoftBrush"] : null,
-                BorderBrush = (IBrush?)Application.Current!.Resources["BorderBrush2"],
+                Background = isSel ? Brush("AccentSoftBrush") : null,
+                BorderBrush = Brush("BorderBrush2"),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(20),
                 Padding = new Thickness(9, 4),
@@ -91,9 +93,7 @@ public partial class AddEditItemWindow : Window
                 {
                     Text = label,
                     FontSize = 11,
-                    Foreground = isSel
-                        ? (IBrush?)Application.Current!.Resources["AccentInkBrush"]
-                        : (IBrush?)Application.Current!.Resources["TextDimBrush"],
+                    Foreground = isSel ? Brush("AccentInkBrush") : Brush("TextDimBrush"),
                 },
             };
             chip.PointerPressed += (_, _) =>

@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Pinbox.Views.ViewItemWindow"
+        Width="420" SizeToContent="Height" MaxHeight="520"
+        Background="{DynamicResource SurfaceBrush}"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <StackPanel Margin="20" Spacing="4">
+    <TextBlock x:Name="SubjectText" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,10"/>
+
+    <Border Background="{DynamicResource Surface2Brush}" CornerRadius="9" Padding="14" MaxHeight="360">
+      <ScrollViewer>
+        <TextBlock x:Name="BodyText" FontSize="12.5" Foreground="{DynamicResource TextBrush}"
+                   FontFamily="Consolas" TextWrapping="Wrap"/>
+      </ScrollViewer>
+    </Border>
+
+    <Button Content="Close" Click="OnClose" HorizontalAlignment="Right" Margin="0,14,0,0"
+            Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}" FontWeight="SemiBold"/>
+  </StackPanel>
+</Window>

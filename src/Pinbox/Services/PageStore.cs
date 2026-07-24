@@ -220,6 +220,19 @@ public static class PageStore
         return pages;
     }
 
+    public static List<PinboxPage> ReorderItem(string userId, string pageId, string itemId, int direction)
+    {
+        var pages = Load(userId);
+        var page = pages.FirstOrDefault(p => p.Id == pageId);
+        var index = page?.Items.FindIndex(i => i.Id == itemId) ?? -1;
+        var swapWith = index + direction;
+        if (page == null || index < 0 || swapWith < 0 || swapWith >= page.Items.Count) return pages;
+
+        (page.Items[index], page.Items[swapWith]) = (page.Items[swapWith], page.Items[index]);
+        Save(userId, pages);
+        return pages;
+    }
+
     public static List<PinboxPage> ToggleFavorite(string userId, string pageId, string itemId)
     {
         var pages = Load(userId);

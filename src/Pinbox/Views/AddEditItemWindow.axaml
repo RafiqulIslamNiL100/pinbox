@@ -37,8 +37,8 @@
     <TextBlock x:Name="TemplateLink" Text="Start from a template…" FontSize="11.5" FontWeight="SemiBold"
                Foreground="{DynamicResource AccentBrush}" Cursor="Hand" PointerPressed="OnTemplateClick" Margin="0,10,0,0"/>
 
-    <Border x:Name="ErrorBox" Background="#33E07267" CornerRadius="7" Padding="10,8" Margin="0,10,0,0" IsVisible="False">
-      <TextBlock x:Name="ErrorText" Foreground="{DynamicResource DangerBrush}" FontSize="12" TextWrapping="Wrap"/>
+    <Border x:Name="ErrorBox" Background="{DynamicResource MauveSoftBrush}" CornerRadius="7" Padding="10,8" Margin="0,10,0,0" IsVisible="False">
+      <TextBlock x:Name="ErrorText" Foreground="{DynamicResource MauveBrush}" FontSize="12" TextWrapping="Wrap"/>
     </Border>
 
     <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,16,0,0">

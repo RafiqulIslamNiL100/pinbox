@@ -14,9 +14,9 @@
       <TextBlock Text="Sign in to load your saved messages." FontSize="13"
                  Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,20"/>
 
-      <Border x:Name="ErrorBox" Background="#33E07267" CornerRadius="7" Padding="10,8"
+      <Border x:Name="ErrorBox" Background="{DynamicResource MauveSoftBrush}" CornerRadius="7" Padding="10,8"
               Margin="0,0,0,14" IsVisible="False">
-        <TextBlock x:Name="ErrorText" Foreground="{DynamicResource DangerBrush}" FontSize="12.5"
+        <TextBlock x:Name="ErrorText" Foreground="{DynamicResource MauveBrush}" FontSize="12.5"
                    TextWrapping="Wrap"/>
       </Border>
 

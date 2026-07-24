@@ -23,20 +23,27 @@
     <Border Grid.Row="0" Height="1" Background="{DynamicResource BorderBrush2}" VerticalAlignment="Bottom"/>
 
     <!-- toolbar -->
-    <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,Auto" Margin="14,8" >
-      <TextBlock Grid.Column="0" Text="🔍" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextDimBrush}"/>
-      <TextBox Grid.Column="1" x:Name="SearchBox" Watermark="Search items…" TextChanged="OnSearchChanged" Margin="0,0,8,0"/>
-      <ToggleButton Grid.Column="2" x:Name="MultiSelectToggle" Content="☑" FontSize="13" Padding="7,5" Margin="0,0,8,0"
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="14,8">
+      <Border Grid.Column="0" x:Name="SearchBoxBorder" Background="{DynamicResource BgBrush}" BorderBrush="{DynamicResource BorderBrush2}"
+              BorderThickness="1" CornerRadius="9" Padding="10,7" Margin="0,0,8,0">
+        <Grid ColumnDefinitions="Auto,*">
+          <TextBlock Grid.Column="0" Text="🔍" FontSize="11.5" VerticalAlignment="Center" Margin="0,0,7,0" Foreground="{DynamicResource TextFaintBrush}"/>
+          <TextBox Grid.Column="1" x:Name="SearchBox" Watermark="Search items…" TextChanged="OnSearchChanged"
+                    GotFocus="OnSearchFocus" LostFocus="OnSearchUnfocus"
+                    Background="Transparent" BorderThickness="0" Padding="0" MinHeight="0"/>
+        </Grid>
+      </Border>
+      <ToggleButton Grid.Column="1" x:Name="MultiSelectToggle" Content="☑" FontSize="13" Padding="7,5" Margin="0,0,8,0"
                     Click="OnMultiSelectToggle"/>
-      <Button Grid.Column="3" x:Name="AddItemButton" Content="+ Add item" Click="OnAddItemClick"
+      <Button Grid.Column="2" x:Name="AddItemButton" Content="+ Add item" Click="OnAddItemClick"
               Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}"
               FontWeight="SemiBold" Padding="14,7" CornerRadius="7"/>
     </Grid>
-    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush2}" VerticalAlignment="Bottom"/>
+    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderSoftBrush}" VerticalAlignment="Bottom"/>
 
     <!-- item list -->
     <ScrollViewer Grid.Row="2">
-      <StackPanel x:Name="ItemList" Margin="10,6" Spacing="2"/>
+      <StackPanel x:Name="ItemList" Margin="8,4" Spacing="1"/>
     </ScrollViewer>
 
     <!-- bottom nav -->
@@ -66,7 +73,7 @@
             Background="{DynamicResource TextBrush}" CornerRadius="10" Padding="10,8" IsVisible="False">
       <StackPanel Orientation="Horizontal" Spacing="14">
         <TextBlock x:Name="BulkCountText" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource BgBrush}" VerticalAlignment="Center"/>
-        <TextBlock Text="Delete selected" FontSize="11.5" FontWeight="Bold" Foreground="#FF9D91" Cursor="Hand"
+        <TextBlock Text="Delete selected" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource MauveBrush}" Cursor="Hand"
                    PointerPressed="OnBulkDeleteClick" VerticalAlignment="Center"/>
       </StackPanel>
     </Border>
