@@ -1,0 +1,23 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Pinbox.App"
+             RequestedThemeVariant="Dark">
+
+  <Application.Styles>
+    <FluentTheme />
+  </Application.Styles>
+
+  <Application.Resources>
+    <SolidColorBrush x:Key="BgBrush">#14121D</SolidColorBrush>
+    <SolidColorBrush x:Key="SurfaceBrush">#1C1928</SolidColorBrush>
+    <SolidColorBrush x:Key="Surface2Brush">#262234</SolidColorBrush>
+    <SolidColorBrush x:Key="BorderBrush2">#383150</SolidColorBrush>
+    <SolidColorBrush x:Key="TextBrush">#ECE9F6</SolidColorBrush>
+    <SolidColorBrush x:Key="TextDimBrush">#A59EBD</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentBrush">#A78BFA</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentInkBrush">#1C0F3E</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentSoftBrush">#322A4D</SolidColorBrush>
+    <SolidColorBrush x:Key="DangerBrush">#E07267</SolidColorBrush>
+  </Application.Resources>
+
+</Application>

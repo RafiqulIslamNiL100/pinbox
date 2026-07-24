@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Pinbox.Views.SignUpView">
+  <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="320">
+    <StackPanel Spacing="0">
+      <Border Width="44" Height="44" CornerRadius="11" Background="{DynamicResource AccentSoftBrush}"
+              HorizontalAlignment="Left" Margin="0,0,0,16">
+        <Image Source="/Assets/icon.png" Width="26" Height="26"
+               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      </Border>
+
+      <TextBlock Text="Create your account" FontSize="21" FontWeight="SemiBold"
+                 Foreground="{DynamicResource TextBrush}" Margin="0,0,0,6"/>
+      <TextBlock Text="Your saved messages are stored on this PC." FontSize="13"
+                 Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,20"/>
+
+      <Border x:Name="ErrorBox" Background="#33E07267" CornerRadius="7" Padding="10,8"
+              Margin="0,0,0,14" IsVisible="False">
+        <TextBlock x:Name="ErrorText" Foreground="{DynamicResource DangerBrush}" FontSize="12.5"
+                   TextWrapping="Wrap"/>
+      </Border>
+
+      <TextBlock Text="Name" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
+      <TextBox x:Name="NameBox" Watermark="Your name" Margin="0,0,0,14"/>
+
+      <TextBlock Text="Email" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
+      <TextBox x:Name="EmailBox" Watermark="you@example.com" Margin="0,0,0,14"/>
+
+      <TextBlock Text="Password" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
+      <TextBox x:Name="PasswordBox" Watermark="At least 8 characters" PasswordChar="•" Margin="0,0,0,4"/>
+
+      <Button x:Name="SignUpButton" Content="Create account" HorizontalAlignment="Stretch" Margin="0,16,0,0"
+              Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}"
+              FontWeight="SemiBold" Padding="0,11" CornerRadius="7" Click="OnSignUpClick"/>
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0" Spacing="4">
+        <TextBlock Text="Already have an account?" FontSize="12.5" Foreground="{DynamicResource TextDimBrush}"/>
+        <TextBlock x:Name="GoSignIn" Text="Sign in" FontSize="12.5" FontWeight="Bold"
+                   Foreground="{DynamicResource AccentBrush}" Cursor="Hand" PointerPressed="OnGoSignIn"/>
+      </StackPanel>
+    </StackPanel>
+  </Grid>
+</UserControl>

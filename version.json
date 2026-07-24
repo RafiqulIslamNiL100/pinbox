@@ -1,0 +1,4 @@
+{
+  "version": "1.0.0",
+  "notes": "Initial release: sign in / sign up, numbered saved-messages list, click to send into the last focused app, violet theme."
+}
