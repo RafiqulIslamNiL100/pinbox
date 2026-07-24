@@ -31,8 +31,14 @@ SetCompressor /SOLID lzma
 !insertmacro MUI_LANGUAGE "English"
 
 Section "Install"
-  ; Close Pinbox if it's already running, so an update can overwrite its files.
+  ; Close Pinbox if it's already running, so an update can overwrite its
+  ; files. taskkill returns as soon as it's issued the termination request,
+  ; but Windows can take a brief moment afterward to actually release the
+  ; process's file handles (coreclr.dll, etc.) - copying immediately after
+  ; can still hit "file in use" errors on a fresh update, so give it a
+  ; moment to actually finish tearing the process down.
   nsExec::Exec 'taskkill /IM Pinbox.exe /F'
+  Sleep 1500
 
   SetOutPath "$INSTDIR"
   File /r "..\publish-output\*.*"
