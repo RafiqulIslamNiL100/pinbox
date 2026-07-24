@@ -70,17 +70,29 @@ public static class UpdateService
         var zipPath = Path.Combine(tempDir, "pinbox-update.zip");
         var extractDir = Path.Combine(tempDir, $"pinbox-update-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
         var scriptPath = Path.Combine(tempDir, $"pinbox-apply-update-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.bat");
-        var installDir = AppPaths.InstallDirectory;
+
+        // Update whichever folder Pinbox is actually running from - not a
+        // hardcoded install path. That hardcoded assumption was the actual
+        // bug: anyone running the portable zip (or any copy not installed to
+        // the default location) would have their real running folder left
+        // untouched while a second copy silently appeared elsewhere, making
+        // the update look like it did nothing.
+        var installDir = Path.GetDirectoryName(Environment.ProcessPath)
+            ?? throw new AuthException("Couldn't determine where Pinbox is running from.");
 
         using (var http = new HttpClient())
         {
             http.DefaultRequestHeaders.UserAgent.ParseAdd("Pinbox-App-Updater");
+            http.Timeout = TimeSpan.FromMinutes(3);
             var bytes = await http.GetByteArrayAsync(downloadUrl);
             await File.WriteAllBytesAsync(zipPath, bytes);
         }
 
         if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true);
         ZipFile.ExtractToDirectory(zipPath, extractDir);
+
+        if (!File.Exists(Path.Combine(extractDir, "Pinbox.exe")))
+            throw new AuthException("The downloaded update looked incomplete or corrupt.");
 
         var script = string.Join("\r\n", new[]
         {
