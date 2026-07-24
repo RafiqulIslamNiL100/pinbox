@@ -39,7 +39,16 @@ public static class AuthService
 
     private static async Task<JsonDocument> SendAsync(HttpRequestMessage req, string genericErrorMessage)
     {
-        var res = await Http.SendAsync(req);
+        HttpResponseMessage res;
+        try
+        {
+            res = await Http.SendAsync(req);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            throw new AuthException("Couldn't reach the server. Check your internet connection and try again.");
+        }
+
         var body = await res.Content.ReadAsStringAsync();
         JsonDocument doc;
         try { doc = JsonDocument.Parse(string.IsNullOrWhiteSpace(body) ? "{}" : body); }
