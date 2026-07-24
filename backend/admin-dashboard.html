@@ -162,7 +162,7 @@
 </main>
 
 <script>
-let supabase = null;
+let db = null;
 let allUsers = [];
 let allKeys = [];
 
@@ -198,8 +198,8 @@ async function connect() {
   }
 
   try {
-    supabase = window.supabase.createClient(url, key);
-    const { error } = await supabase.from('profiles').select('id').limit(1);
+    db = window.supabase.createClient(url, key);
+    const { error } = await db.from('profiles').select('id').limit(1);
     if (error) throw error;
 
     if (document.getElementById('rememberBox').checked) {
@@ -229,7 +229,7 @@ function showTab(name) {
 // ---------------- users ----------------
 
 async function loadUsers() {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('profiles')
     .select('*')
     .order('created_at', { ascending: false });
@@ -293,14 +293,14 @@ function renderUsers() {
 }
 
 async function setUserStatus(id, status) {
-  const { error } = await supabase.from('profiles').update({ status }).eq('id', id);
+  const { error } = await db.from('profiles').update({ status }).eq('id', id);
   if (error) { alert('Failed: ' + error.message); return; }
   await loadUsers();
 }
 
 async function deleteUser(id, email) {
   if (!confirm(`Permanently delete ${email}? This removes their account and profile entirely.`)) return;
-  const { error } = await supabase.auth.admin.deleteUser(id);
+  const { error } = await db.auth.admin.deleteUser(id);
   if (error) { alert('Failed: ' + error.message); return; }
   await loadUsers();
 }
@@ -320,7 +320,7 @@ async function generateKey() {
   const note = document.getElementById('genNote').value.trim() || null;
   const code = randomKeyCode();
 
-  const { error } = await supabase.from('activation_keys').insert({
+  const { error } = await db.from('activation_keys').insert({
     code, duration_days: duration, assigned_email: email, note,
   });
 
@@ -336,7 +336,7 @@ async function generateKey() {
 }
 
 async function loadKeys() {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('activation_keys')
     .select('*')
     .order('created_at', { ascending: false });
@@ -400,7 +400,7 @@ function copyKey(code) {
 
 async function revokeKey(id) {
   if (!confirm('Revoke this key? It can no longer be redeemed.')) return;
-  const { error } = await supabase.from('activation_keys').update({ status: 'revoked' }).eq('id', id);
+  const { error } = await db.from('activation_keys').update({ status: 'revoked' }).eq('id', id);
   if (error) { alert('Failed: ' + error.message); return; }
   await loadKeys();
 }
