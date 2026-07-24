@@ -1,4 +1,4 @@
 {
-  "version": "2.5.0",
-  "notes": "Fixed a real crash on send: SendInput's Windows struct was undersized, corrupting memory - now correctly sized. Also fixed red bleeding through from your Windows accent color on toggle switches and focus states (now always purple regardless of OS theme color), and a self-update bug that silently updated the wrong folder for portable installs."
+  "version": "2.5.1",
+  "notes": "Fixed self-updating for real: 'Update now' now downloads and silently runs the actual installer (the same one you'd run by hand) instead of hand-copying files, then relaunches Pinbox automatically. This is what manual reinstalls were doing correctly all along - the in-app button now does the same thing."
 }

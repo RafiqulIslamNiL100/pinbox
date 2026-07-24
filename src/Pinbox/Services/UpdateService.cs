@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -17,7 +16,7 @@ public static class UpdateService
     private const string VersionUrl =
         "https://raw.githubusercontent.com/RafiqulIslamNiL100/pinbox/main/version.json";
     private const string DownloadUrlTemplate =
-        "https://raw.githubusercontent.com/RafiqulIslamNiL100/pinbox/main/Pinbox-for-Windows.zip";
+        "https://raw.githubusercontent.com/RafiqulIslamNiL100/pinbox/main/Pinbox-Setup.exe";
 
     public static string CurrentVersion =>
         Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
@@ -61,69 +60,74 @@ public static class UpdateService
         }
     }
 
-    /// Downloads the new build, extracts it, and hands off to a small script
-    /// that waits for Pinbox.exe to exit, swaps the installed files, and
-    /// relaunches it. Call Environment.Exit after this to let the swap happen.
+    /// Downloads the real installer (the same Pinbox-Setup.exe you'd run by
+    /// hand) and runs it silently, then relaunches Pinbox once it's done.
+    ///
+    /// This replaced an earlier version that manually extracted a zip and
+    /// xcopy'd files into place itself. That hand-rolled approach had two
+    /// real bugs: it assumed a hardcoded install folder (breaking portable
+    /// installs), and even once that was fixed, a plain file copy has no way
+    /// to deal with locked DLLs, partial antivirus scans, or any of the other
+    /// things a real installer already handles correctly - which is exactly
+    /// why "download Setup.exe and run it yourself" always worked while the
+    /// in-app button didn't. Running that same installer silently gives the
+    /// in-app button the same reliability.
     public static async Task DownloadAndApplyAsync(string downloadUrl)
     {
         var tempDir = Path.GetTempPath();
-        var zipPath = Path.Combine(tempDir, "pinbox-update.zip");
-        var extractDir = Path.Combine(tempDir, $"pinbox-update-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-        var scriptPath = Path.Combine(tempDir, $"pinbox-apply-update-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.bat");
-
-        // Update whichever folder Pinbox is actually running from - not a
-        // hardcoded install path. That hardcoded assumption was the actual
-        // bug: anyone running the portable zip (or any copy not installed to
-        // the default location) would have their real running folder left
-        // untouched while a second copy silently appeared elsewhere, making
-        // the update look like it did nothing.
-        var installDir = Path.GetDirectoryName(Environment.ProcessPath)
-            ?? throw new AuthException("Couldn't determine where Pinbox is running from.");
+        var installerPath = Path.Combine(tempDir, $"Pinbox-Setup-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.exe");
 
         using (var http = new HttpClient())
         {
             http.DefaultRequestHeaders.UserAgent.ParseAdd("Pinbox-App-Updater");
             http.Timeout = TimeSpan.FromMinutes(3);
             var bytes = await http.GetByteArrayAsync(downloadUrl);
-            await File.WriteAllBytesAsync(zipPath, bytes);
+            await File.WriteAllBytesAsync(installerPath, bytes);
         }
 
-        if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true);
-        ZipFile.ExtractToDirectory(zipPath, extractDir);
+        // A real installer is tens of MB; anything drastically smaller means
+        // the download got cut short or GitHub served an error page instead.
+        if (new FileInfo(installerPath).Length < 5_000_000)
+            throw new AuthException("The downloaded update looked incomplete - check your internet connection and try again.");
 
-        if (!File.Exists(Path.Combine(extractDir, "Pinbox.exe")))
-            throw new AuthException("The downloaded update looked incomplete or corrupt.");
+        // RequestExecutionLevel in the installer is "user", so /S runs with
+        // no UAC prompt and no visible window. taskkill inside the installer
+        // itself closes the currently-running Pinbox.exe for us.
+        var installerProcess = Process.Start(new ProcessStartInfo
+        {
+            FileName = installerPath,
+            Arguments = "/S",
+            UseShellExecute = true,
+        }) ?? throw new AuthException("Couldn't start the installer.");
 
+        // A silent install skips the finish page, so nothing relaunches
+        // Pinbox automatically - a small detached script waits for the
+        // installer (by its exact PID, not by name) to finish, then starts
+        // the freshly-installed Pinbox.exe itself and cleans up after itself.
+        var installDir = AppPaths.InstallDirectory;
+        var scriptPath = Path.Combine(tempDir, $"pinbox-relaunch-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.bat");
         var script = string.Join("\r\n", new[]
         {
             "@echo off",
-            "setlocal",
-            $"set \"DEST={installDir}\"",
-            $"set \"NEW={extractDir}\"",
             ":waitloop",
-            "tasklist /FI \"IMAGENAME eq Pinbox.exe\" 2>NUL | find /I \"Pinbox.exe\" >NUL",
+            $"tasklist /FI \"PID eq {installerProcess.Id}\" 2>NUL | find \"{installerProcess.Id}\" >NUL",
             "if \"%ERRORLEVEL%\"==\"0\" (",
             "  timeout /t 1 >nul",
             "  goto waitloop",
             ")",
-            "if exist \"%DEST%\" rmdir /s /q \"%DEST%\"",
-            "mkdir \"%DEST%\" >nul 2>nul",
-            "xcopy \"%NEW%\\*\" \"%DEST%\\\" /E /I /Y /Q >nul",
-            "start \"\" \"%DEST%\\Pinbox.exe\"",
-            "rmdir /s /q \"%NEW%\"",
-            $"del \"{zipPath}\"",
+            $"start \"\" \"{installDir}\\Pinbox.exe\"",
+            $"del \"{installerPath}\"",
             "del \"%~f0\"",
             "",
         });
         await File.WriteAllTextAsync(scriptPath, script);
 
-        var psi = new ProcessStartInfo
+        Process.Start(new ProcessStartInfo
         {
             FileName = "cmd.exe",
             Arguments = $"/c \"{scriptPath}\"",
             UseShellExecute = false,
             CreateNoWindow = true,
-        };
-        Process.Start(psi);
+        });
     }
 }
