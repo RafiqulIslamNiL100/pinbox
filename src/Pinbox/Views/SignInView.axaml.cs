@@ -9,7 +9,7 @@ namespace Pinbox.Views;
 
 public partial class SignInView : UserControl
 {
-    public event EventHandler<PublicUser>? SignedIn;
+    public event EventHandler<AuthSession>? SignedIn;
     public event EventHandler? GoToSignUp;
 
     public SignInView()
@@ -17,18 +17,23 @@ public partial class SignInView : UserControl
         InitializeComponent();
     }
 
-    private void OnSignInClick(object? sender, RoutedEventArgs e)
+    private async void OnSignInClick(object? sender, RoutedEventArgs e)
     {
         ErrorBox.IsVisible = false;
+        SignInButton.IsEnabled = false;
         try
         {
-            var user = AuthService.SignIn(EmailBox.Text ?? "", PasswordBox.Text ?? "");
-            SignedIn?.Invoke(this, user);
+            var session = await AuthService.SignInAsync(EmailBox.Text ?? "", PasswordBox.Text ?? "");
+            SignedIn?.Invoke(this, session);
         }
         catch (AuthException ex)
         {
             ErrorText.Text = ex.Message;
             ErrorBox.IsVisible = true;
+        }
+        finally
+        {
+            SignInButton.IsEnabled = true;
         }
     }
 

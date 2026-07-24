@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Pinbox Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root {
+    --bg: #16141f; --surface: #1e1b2a; --surface2: #262233; --border: #322d43;
+    --text: #eeeaf7; --dim: #9791ac; --accent: #a78bfa; --accent-ink: #1c1230;
+    --good: #4fd39a; --good-soft: #173a2c; --bad: #e07267; --bad-soft: #3a1f1c;
+    --warn: #e0b23f; --warn-soft: #3a2f14;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, Segoe UI, Roboto, sans-serif; }
+  header { padding: 18px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  header .logo { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent-ink); }
+  header h1 { font-size: 16px; margin: 0; }
+  header .sub { font-size: 12px; color: var(--dim); margin-left: auto; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 28px 60px; }
+  .setup { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+  .setup label { display: block; font-size: 12px; color: var(--dim); margin: 10px 0 4px; }
+  .setup input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; color: var(--text); font-size: 13px; }
+  .setup .row { display: flex; gap: 12px; }
+  .setup .row > div { flex: 1; }
+  button { cursor: pointer; border: none; border-radius: 8px; padding: 9px 14px; font-size: 12.5px; font-weight: 600; background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border: none; }
+  button.danger { background: var(--bad-soft); color: var(--bad); }
+  button.warn { background: var(--warn-soft); color: var(--warn); }
+  button.good { background: var(--good-soft); color: var(--good); }
+  button:disabled { opacity: .5; cursor: default; }
+  .tabs { display: flex; gap: 6px; margin: 20px 0 16px; }
+  .tabs button { background: var(--surface); }
+  .tabs button.active { background: var(--accent); color: var(--accent-ink); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .card h2 { font-size: 14px; margin: 0 0 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { text-align: left; padding: 8px 10px; color: var(--dim); font-weight: 600; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  .pill { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10.5px; font-weight: 700; }
+  .pill.active { background: var(--good-soft); color: var(--good); }
+  .pill.restricted { background: var(--warn-soft); color: var(--warn); }
+  .pill.banned { background: var(--bad-soft); color: var(--bad); }
+  .pill.unredeemed { background: var(--surface2); color: var(--dim); }
+  .pill.redeemed { background: var(--good-soft); color: var(--good); }
+  .pill.revoked { background: var(--bad-soft); color: var(--bad); }
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .gen-form { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
+  .gen-form label { font-size: 11.5px; color: var(--dim); display: block; margin-bottom: 4px; }
+  .gen-form input, .gen-form select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 12.5px; }
+  .msg { font-size: 12px; padding: 10px 12px; border-radius: 8px; margin-bottom: 14px; }
+  .msg.err { background: var(--bad-soft); color: var(--bad); }
+  .msg.ok { background: var(--good-soft); color: var(--good); }
+  .hidden { display: none !important; }
+  code { background: var(--surface2); padding: 2px 6px; border-radius: 5px; font-size: 11.5px; }
+  .code-cell { font-family: Consolas, monospace; letter-spacing: 0.5px; }
+  .empty { color: var(--dim); font-size: 12.5px; padding: 14px 4px; }
+  .search-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .search-row input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 11px; color: var(--text); font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">P</div>
+  <h1>Pinbox Admin</h1>
+  <div class="sub" id="connSub">Not connected</div>
+</header>
+
+<main>
+
+  <div class="setup" id="setupCard">
+    <h2 style="font-size:14px;margin:0 0 6px;">Connect to your Supabase project</h2>
+    <p style="font-size:12px;color:var(--dim);margin:0 0 4px;">
+      Use the <b>service_role</b> key here (Project Settings &rarr; API), never the anon key -
+      the service_role key is what lets this page bypass row-level security to manage every user.
+      This page runs entirely in your browser; nothing is sent anywhere except directly to your
+      own Supabase project. Keep this file local and never share it with your service_role key filled in.
+    </p>
+    <div class="row">
+      <div>
+        <label>Project URL</label>
+        <input id="urlInput" placeholder="https://xxxx.supabase.co" />
+      </div>
+      <div>
+        <label>service_role key</label>
+        <input id="keyInput" type="password" placeholder="eyJhbGciOi..." />
+      </div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px;align-items:center;">
+      <button class="primary" onclick="connect()">Connect</button>
+      <label style="font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px;">
+        <input type="checkbox" id="rememberBox" style="width:auto;" /> Remember on this computer
+      </label>
+    </div>
+    <div id="setupMsg"></div>
+  </div>
+
+  <div id="dashboard" class="hidden">
+
+    <div class="tabs">
+      <button class="active" onclick="showTab('users')" id="tabBtnUsers">Users</button>
+      <button onclick="showTab('keys')" id="tabBtnKeys">Activation keys</button>
+    </div>
+
+    <div class="panel active" id="panelUsers">
+      <div class="card">
+        <h2>Users (<span id="userCount">0</span>)</h2>
+        <div class="search-row">
+          <input id="userSearch" placeholder="Search by name or email…" oninput="renderUsers()" />
+          <button onclick="loadUsers()">Refresh</button>
+        </div>
+        <div id="usersTableWrap"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panelKeys">
+      <div class="card">
+        <h2>Generate a new key</h2>
+        <div class="gen-form">
+          <div>
+            <label>Expires in</label>
+            <select id="genDuration">
+              <option value="">Never expires</option>
+              <option value="7">1 week</option>
+              <option value="30" selected>1 month</option>
+              <option value="60">2 months</option>
+              <option value="90">3 months</option>
+              <option value="180">6 months</option>
+              <option value="365">1 year</option>
+            </select>
+          </div>
+          <div>
+            <label>Assign to (optional email, for your reference)</label>
+            <input id="genEmail" placeholder="someone@example.com" style="width:220px;" />
+          </div>
+          <div>
+            <label>Note (optional)</label>
+            <input id="genNote" placeholder="e.g. paid via bank transfer 24 Jul" style="width:220px;" />
+          </div>
+          <button class="primary" onclick="generateKey()">Generate key</button>
+        </div>
+        <div id="genMsg"></div>
+      </div>
+
+      <div class="card">
+        <h2>All keys (<span id="keyCount">0</span>)</h2>
+        <div class="search-row">
+          <input id="keySearch" placeholder="Search by code, email or note…" oninput="renderKeys()" />
+          <button onclick="loadKeys()">Refresh</button>
+        </div>
+        <div id="keysTableWrap"></div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+let supabase = null;
+let allUsers = [];
+let allKeys = [];
+
+const STORAGE_KEY = 'pinbox_admin_conn';
+
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const { url, key } = JSON.parse(saved);
+      document.getElementById('urlInput').value = url || '';
+      document.getElementById('keyInput').value = key || '';
+      document.getElementById('rememberBox').checked = true;
+    } catch { /* ignore corrupt storage */ }
+  }
+});
+
+function showMsg(elId, text, ok) {
+  const el = document.getElementById(elId);
+  el.innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}">${escapeHtml(text)}</div>`;
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+async function connect() {
+  const url = document.getElementById('urlInput').value.trim();
+  const key = document.getElementById('keyInput').value.trim();
+  if (!url || !key) {
+    showMsg('setupMsg', 'Enter both the project URL and the service_role key.', false);
+    return;
+  }
+
+  try {
+    supabase = window.supabase.createClient(url, key);
+    const { error } = await supabase.from('profiles').select('id').limit(1);
+    if (error) throw error;
+
+    if (document.getElementById('rememberBox').checked) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ url, key }));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    document.getElementById('setupCard').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    document.getElementById('connSub').textContent = url;
+
+    await loadUsers();
+    await loadKeys();
+  } catch (err) {
+    showMsg('setupMsg', 'Could not connect: ' + (err.message || err), false);
+  }
+}
+
+function showTab(name) {
+  document.getElementById('panelUsers').classList.toggle('active', name === 'users');
+  document.getElementById('panelKeys').classList.toggle('active', name === 'keys');
+  document.getElementById('tabBtnUsers').classList.toggle('active', name === 'users');
+  document.getElementById('tabBtnKeys').classList.toggle('active', name === 'keys');
+}
+
+// ---------------- users ----------------
+
+async function loadUsers() {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('usersTableWrap').innerHTML = `<div class="empty">Failed to load: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  allUsers = data || [];
+  renderUsers();
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleString();
+}
+
+function renderUsers() {
+  const q = document.getElementById('userSearch').value.trim().toLowerCase();
+  const rows = allUsers.filter(u =>
+    !q || (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)
+  );
+  document.getElementById('userCount').textContent = allUsers.length;
+
+  if (rows.length === 0) {
+    document.getElementById('usersTableWrap').innerHTML = `<div class="empty">No users found.</div>`;
+    return;
+  }
+
+  const html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th><th>Email</th><th>Created via</th><th>Status</th>
+          <th>Key</th><th>Key expires</th><th>Last seen</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(u => `
+          <tr>
+            <td>${escapeHtml(u.name || '—')}</td>
+            <td>${escapeHtml(u.email)}</td>
+            <td>${u.signup_path === 'admin' ? 'Admin-created' : 'Self-registered'}</td>
+            <td><span class="pill ${u.status}">${u.status}</span></td>
+            <td class="code-cell">${escapeHtml(u.redeemed_key_code || '—')}</td>
+            <td>${u.key_expires_at ? fmtDate(u.key_expires_at) : (u.redeemed_key_code ? 'Never' : '—')}</td>
+            <td>${fmtDate(u.last_seen)}</td>
+            <td>
+              <div class="actions">
+                ${u.status !== 'active' ? `<button class="good" onclick="setUserStatus('${u.id}','active')">Activate</button>` : ''}
+                ${u.status !== 'restricted' ? `<button class="warn" onclick="setUserStatus('${u.id}','restricted')">Restrict</button>` : ''}
+                ${u.status !== 'banned' ? `<button class="danger" onclick="setUserStatus('${u.id}','banned')">Ban</button>` : ''}
+                <button class="danger" onclick="deleteUser('${u.id}','${escapeHtml(u.email)}')">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  document.getElementById('usersTableWrap').innerHTML = html;
+}
+
+async function setUserStatus(id, status) {
+  const { error } = await supabase.from('profiles').update({ status }).eq('id', id);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await loadUsers();
+}
+
+async function deleteUser(id, email) {
+  if (!confirm(`Permanently delete ${email}? This removes their account and profile entirely.`)) return;
+  const { error } = await supabase.auth.admin.deleteUser(id);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await loadUsers();
+}
+
+// ---------------- keys ----------------
+
+function randomKeyCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const group = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `PBX-${group()}-${group()}-${group()}`;
+}
+
+async function generateKey() {
+  const durationVal = document.getElementById('genDuration').value;
+  const duration = durationVal === '' ? null : parseInt(durationVal, 10);
+  const email = document.getElementById('genEmail').value.trim() || null;
+  const note = document.getElementById('genNote').value.trim() || null;
+  const code = randomKeyCode();
+
+  const { error } = await supabase.from('activation_keys').insert({
+    code, duration_days: duration, assigned_email: email, note,
+  });
+
+  if (error) {
+    showMsg('genMsg', 'Failed to generate key: ' + error.message, false);
+    return;
+  }
+
+  showMsg('genMsg', `Key generated: ${code} — copy it to the customer now.`, true);
+  document.getElementById('genEmail').value = '';
+  document.getElementById('genNote').value = '';
+  await loadKeys();
+}
+
+async function loadKeys() {
+  const { data, error } = await supabase
+    .from('activation_keys')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('keysTableWrap').innerHTML = `<div class="empty">Failed to load: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  allKeys = data || [];
+  renderKeys();
+}
+
+function renderKeys() {
+  const q = document.getElementById('keySearch').value.trim().toLowerCase();
+  const rows = allKeys.filter(k =>
+    !q || (k.code || '').toLowerCase().includes(q) ||
+    (k.assigned_email || '').toLowerCase().includes(q) ||
+    (k.note || '').toLowerCase().includes(q)
+  );
+  document.getElementById('keyCount').textContent = allKeys.length;
+
+  if (rows.length === 0) {
+    document.getElementById('keysTableWrap').innerHTML = `<div class="empty">No keys yet. Generate one above.</div>`;
+    return;
+  }
+
+  const html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th><th>Duration</th><th>Status</th><th>Assigned to</th>
+          <th>Note</th><th>Created</th><th>Redeemed</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(k => `
+          <tr>
+            <td class="code-cell">${escapeHtml(k.code)}</td>
+            <td>${k.duration_days ? k.duration_days + ' days' : 'Never expires'}</td>
+            <td><span class="pill ${k.status}">${k.status}</span></td>
+            <td>${escapeHtml(k.assigned_email || '—')}</td>
+            <td>${escapeHtml(k.note || '—')}</td>
+            <td>${fmtDate(k.created_at)}</td>
+            <td>${k.redeemed_at ? fmtDate(k.redeemed_at) : '—'}</td>
+            <td>
+              <div class="actions">
+                <button onclick="copyKey('${k.code}')">Copy</button>
+                ${k.status === 'unredeemed' ? `<button class="danger" onclick="revokeKey('${k.id}')">Revoke</button>` : ''}
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  document.getElementById('keysTableWrap').innerHTML = html;
+}
+
+function copyKey(code) {
+  navigator.clipboard.writeText(code).catch(() => {});
+}
+
+async function revokeKey(id) {
+  if (!confirm('Revoke this key? It can no longer be redeemed.')) return;
+  const { error } = await supabase.from('activation_keys').update({ status: 'revoked' }).eq('id', id);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await loadKeys();
+}
+</script>
+
+</body>
+</html>

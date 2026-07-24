@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Pinbox.Views.PinLockWindow"
+        Width="300" SizeToContent="Height"
+        Background="{DynamicResource SurfaceBrush}"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="Pinbox — Locked">
+  <StackPanel Margin="26,30" Spacing="6" HorizontalAlignment="Center">
+    <Border Width="44" Height="44" CornerRadius="11" Background="{DynamicResource GoldSoftBrush}" HorizontalAlignment="Center" Margin="0,0,0,6">
+      <TextBlock Text="🔒" FontSize="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Border>
+    <TextBlock Text="Enter your PIN" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
+    <TextBlock Text="Locked after being idle." FontSize="11.5" Foreground="{DynamicResource TextDimBrush}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+    <TextBox x:Name="PinInput" PasswordChar="•" MaxLength="6" HorizontalContentAlignment="Center" FontSize="18" Margin="0,0,0,8" KeyDown="OnKeyDown"/>
+
+    <TextBlock x:Name="ErrorText" Foreground="{DynamicResource DangerBrush}" FontSize="11.5" IsVisible="False" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+
+    <Button Content="Unlock" Click="OnUnlockClick" HorizontalAlignment="Stretch" Padding="0,10"
+            Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}" FontWeight="SemiBold"/>
+  </StackPanel>
+</Window>

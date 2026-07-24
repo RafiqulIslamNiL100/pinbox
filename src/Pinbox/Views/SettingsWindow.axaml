@@ -1,0 +1,92 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Pinbox.Views.SettingsWindow"
+        Width="500" Height="440"
+        Background="{DynamicResource SurfaceBrush}"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <TextBlock Grid.Row="0" Text="Settings" FontSize="15" FontWeight="Bold" Margin="20,16,20,10"
+               Foreground="{DynamicResource TextBrush}"/>
+
+    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4" Margin="16,0" >
+      <ToggleButton x:Name="GeneralTabBtn" Content="General" Click="OnGeneralTabClick" IsChecked="True"/>
+      <ToggleButton x:Name="AccountTabBtn" Content="Account &amp; data" Click="OnAccountTabClick" Margin="4,0,0,0"/>
+    </StackPanel>
+    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush2}" VerticalAlignment="Bottom" Margin="0,8,0,0"/>
+
+    <ScrollViewer Grid.Row="2">
+    <Grid>
+      <StackPanel x:Name="GeneralPanel" Margin="20,14">
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Global hotkey" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Opens Pinbox from anywhere" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <TextBox Grid.Column="1" x:Name="HotkeyBox" Width="150" FontFamily="Consolas" VerticalAlignment="Center"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Start with Windows" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Launch Pinbox on login" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <CheckBox Grid.Column="1" x:Name="AutoStartCheck" VerticalAlignment="Center"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Compact mode" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Use a smaller window by default" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <CheckBox Grid.Column="1" x:Name="CompactCheck" VerticalAlignment="Center"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Windows notifications" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Show a system toast when a message is sent" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <CheckBox Grid.Column="1" x:Name="NotifCheck" VerticalAlignment="Center"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Theme" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Override the Windows light/dark setting" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <ComboBox Grid.Column="1" x:Name="ThemeCombo" Width="120" VerticalAlignment="Center">
+            <ComboBoxItem>Light</ComboBoxItem>
+            <ComboBoxItem>Dark</ComboBoxItem>
+            <ComboBoxItem>System</ComboBoxItem>
+          </ComboBox>
+        </Grid>
+        <Button Content="Save" Click="OnSaveGeneral" HorizontalAlignment="Right"
+                Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}" FontWeight="SemiBold"/>
+      </StackPanel>
+
+      <StackPanel x:Name="AccountPanel" Margin="20,14" IsVisible="False">
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="License" FontWeight="SemiBold" FontSize="13"/><TextBlock x:Name="LicenseDesc" Text="" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <Border Grid.Column="1" Background="{DynamicResource GoodSoftBrush}" CornerRadius="20" Padding="9,3" VerticalAlignment="Center">
+            <TextBlock x:Name="LicenseBadge" Text="Active" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource GoodBrush}"/>
+          </Border>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Account" FontWeight="SemiBold" FontSize="13"/><TextBlock x:Name="AccountEmail" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <Button Grid.Column="1" Content="Sign out" Click="OnSignOutClick" VerticalAlignment="Center"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Language" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Translates Pinbox's own interface only" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+            <ToggleButton x:Name="LangEnBtn" Content="EN" Click="OnLangEnClick"/>
+            <ToggleButton x:Name="LangZhBtn" Content="中文" Click="OnLangZhClick" Margin="4,0,0,0"/>
+          </StackPanel>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Auto-lock" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Require a PIN after being idle" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <ComboBox Grid.Column="1" x:Name="AutoLockCombo" Width="120" VerticalAlignment="Center">
+            <ComboBoxItem>Off</ComboBoxItem>
+            <ComboBoxItem>5 minutes</ComboBoxItem>
+            <ComboBoxItem>15 minutes</ComboBoxItem>
+          </ComboBox>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Set PIN" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Required if auto-lock is on" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <TextBox Grid.Column="1" x:Name="PinBox" Width="100" PasswordChar="•" MaxLength="6" VerticalAlignment="Center"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+          <StackPanel Grid.Column="0"><TextBlock Text="Backup" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Export or import your pages and items" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+            <Button Content="Export" Click="OnExportClick"/>
+            <Button Content="Import" Click="OnImportClick"/>
+          </StackPanel>
+        </Grid>
+        <Button Content="Save" Click="OnSaveAccount" HorizontalAlignment="Right"
+                Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}" FontWeight="SemiBold"/>
+      </StackPanel>
+    </Grid>
+    </ScrollViewer>
+  </Grid>
+</Window>

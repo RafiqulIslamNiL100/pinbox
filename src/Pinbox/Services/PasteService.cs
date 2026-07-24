@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Input.Platform;
+using Avalonia.Platform.Storage;
 
 namespace Pinbox.Services;
 
@@ -79,5 +82,36 @@ public static class PasteService
                 try { await clipboard.SetTextAsync(previous); } catch { /* best effort */ }
             });
         }
+    }
+
+    /// Puts the image file itself on the clipboard (as a copied file, the
+    /// same as copying it in Explorer), minimizes Pinbox, then pastes. Most
+    /// chat/email/document apps accept a pasted file this way and attach or
+    /// inline it as an image.
+    public static async Task SendImageAsync(Window window, string imagePath)
+    {
+        if (!OperatingSystem.IsWindows())
+            throw new AuthException("Sending into other apps is only supported on Windows.");
+
+        IClipboard? clipboard = window.Clipboard;
+        if (clipboard is not null)
+        {
+            var topLevel = TopLevel.GetTopLevel(window);
+            var file = topLevel is not null
+                ? await topLevel.StorageProvider.TryGetFileFromPathAsync(imagePath)
+                : null;
+
+            var data = new DataObject();
+            if (file is not null)
+            {
+                data.Set(DataFormats.Files, new List<IStorageItem> { file });
+            }
+            await clipboard.SetDataObjectAsync(data);
+        }
+
+        window.WindowState = WindowState.Minimized;
+        await Task.Delay(300);
+
+        SendCtrlV();
     }
 }

@@ -18,6 +18,10 @@
     <SolidColorBrush x:Key="AccentInkBrush">#1C0F3E</SolidColorBrush>
     <SolidColorBrush x:Key="AccentSoftBrush">#322A4D</SolidColorBrush>
     <SolidColorBrush x:Key="DangerBrush">#E07267</SolidColorBrush>
+    <SolidColorBrush x:Key="GoldBrush">#E0B23F</SolidColorBrush>
+    <SolidColorBrush x:Key="GoldSoftBrush">#3A2F14</SolidColorBrush>
+    <SolidColorBrush x:Key="GoodBrush">#4FD39A</SolidColorBrush>
+    <SolidColorBrush x:Key="GoodSoftBrush">#173A2C</SolidColorBrush>
   </Application.Resources>
 
 </Application>

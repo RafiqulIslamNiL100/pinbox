@@ -1,4 +1,4 @@
 {
-  "version": "1.0.0",
-  "notes": "Initial release: sign in / sign up, numbered saved-messages list, click to send into the last focused app, violet theme."
+  "version": "2.0.0",
+  "notes": "Major update: licensed activation-key system (paid app), multi-page saved-item lists with text and picture items, favorites, labels, search, usage stats, drag-and-drop image support, bilingual English/Chinese interface, PIN auto-lock, backup/export/import, and an admin dashboard for issuing keys and managing users."
 }

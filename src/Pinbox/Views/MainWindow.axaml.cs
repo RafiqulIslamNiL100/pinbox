@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -16,31 +14,32 @@ public partial class MainWindow : Window
     public bool IsQuitting { get; set; }
 
     private UpdateInfo? _pendingUpdate;
-
-    private static string SessionFilePath =>
-        Path.Combine(AppPaths.DataDirectory, "session.json");
+    private AuthSession? _session;
+    private HotkeyService? _hotkeys;
+    private AutoLockService? _autoLock;
+    private DispatcherTimer? _licenseTimer;
 
     public MainWindow()
     {
         InitializeComponent();
 
-        SignInViewControl.SignedIn += (_, user) => EnterApp(user);
+        SignInViewControl.SignedIn += async (_, session) => await OnAuthenticated(session);
         SignInViewControl.GoToSignUp += (_, _) => ShowScreen("signup");
 
-        SignUpViewControl.SignedUp += (_, user) => EnterApp(user);
+        SignUpViewControl.SignedUp += async (_, session) => await OnAuthenticated(session);
         SignUpViewControl.GoToSignIn += (_, _) => ShowScreen("signin");
 
+        ActivateKeyViewControl.Activated += async (_, _) => await EnterMainAsync();
+        ActivateKeyViewControl.SignOutRequested += (_, _) => DoSignOut();
+
         MainViewControl.Initialize(this);
-        MainViewControl.SignedOut += (_, _) =>
-        {
-            ClearSession();
-            SignInViewControl.Clear();
-            ShowScreen("signin");
-        };
+        MainViewControl.SignedOut += (_, _) => DoSignOut();
+        MainViewControl.PageHotkeysChanged += (_, _) => RegisterHotkeys();
 
         Opened += async (_, _) =>
         {
-            TryResumeSession();
+            SetUpHotkeysAndAutoLock();
+            await TryResumeSessionAsync();
             await CheckForUpdateAsync();
         };
     }
@@ -49,49 +48,162 @@ public partial class MainWindow : Window
     {
         SignInViewControl.IsVisible = name == "signin";
         SignUpViewControl.IsVisible = name == "signup";
+        ActivateKeyViewControl.IsVisible = name == "activate";
         MainViewControl.IsVisible = name == "main";
     }
 
-    private void EnterApp(PublicUser user)
+    private async Task OnAuthenticated(AuthSession session)
     {
-        SaveSession(user);
-        MainViewControl.EnterAs(user);
-        ShowScreen("main");
+        _session = session;
+        AuthService.SaveSession(session);
+
+        var status = await SafeCheckLicenseAsync();
+        if (status is { Ok: true })
+        {
+            await EnterMainAsync();
+        }
+        else
+        {
+            ActivateKeyViewControl.SetSession(session, status?.Reason);
+            ShowScreen("activate");
+        }
     }
 
-    private void TryResumeSession()
+    private async Task<LicenseStatus?> SafeCheckLicenseAsync()
     {
+        if (_session is null) return null;
         try
         {
-            if (!File.Exists(SessionFilePath)) { ShowScreen("signin"); return; }
-            var json = File.ReadAllText(SessionFilePath);
-            var user = JsonSerializer.Deserialize<PublicUser>(json);
-            if (user is not null)
-            {
-                MainViewControl.EnterAs(user);
-                ShowScreen("main");
-                return;
-            }
+            return await LicenseService.CheckLicenseAsync(_session);
         }
-        catch { /* fall through to sign-in */ }
+        catch
+        {
+            // Network unreachable etc. - treat as "can't verify right now"
+            // rather than instantly locking someone out over a dropped
+            // connection. Caller decides what to do with a null result.
+            return null;
+        }
+    }
+
+    private async Task EnterMainAsync()
+    {
+        if (_session is null) return;
+        MainViewControl.EnterAs(_session);
+        ShowScreen("main");
+        RegisterHotkeys();
+        StartLicensePolling();
+    }
+
+    private async Task TryResumeSessionAsync()
+    {
+        var saved = AuthService.LoadSession();
+        if (saved is null)
+        {
+            ShowScreen("signin");
+            return;
+        }
+
+        _session = saved;
+        var status = await SafeCheckLicenseAsync();
+
+        if (status is null)
+        {
+            // Couldn't reach the server right now - let them in with what we
+            // last knew rather than blocking on a network hiccup.
+            await EnterMainAsync();
+        }
+        else if (status.Ok)
+        {
+            await EnterMainAsync();
+        }
+        else
+        {
+            ActivateKeyViewControl.SetSession(_session, status.Reason);
+            ShowScreen("activate");
+        }
+    }
+
+    private void StartLicensePolling()
+    {
+        _licenseTimer?.Stop();
+        _licenseTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
+        _licenseTimer.Tick += async (_, _) =>
+        {
+            var status = await SafeCheckLicenseAsync();
+            if (status is { Ok: false } && _session is not null)
+            {
+                _licenseTimer?.Stop();
+                ActivateKeyViewControl.SetSession(_session, status.Reason);
+                ShowScreen("activate");
+            }
+        };
+        _licenseTimer.Start();
+    }
+
+    private void DoSignOut()
+    {
+        _licenseTimer?.Stop();
+        _session = null;
+        AuthService.ClearSession();
+        SignInViewControl.Clear();
         ShowScreen("signin");
     }
 
-    private void SaveSession(PublicUser user)
+    // ---------------- hotkeys ----------------
+
+    private void SetUpHotkeysAndAutoLock()
     {
-        try
-        {
-            Directory.CreateDirectory(AppPaths.DataDirectory);
-            File.WriteAllText(SessionFilePath, JsonSerializer.Serialize(user));
-        }
-        catch { /* non-fatal */ }
+        _hotkeys = new HotkeyService();
+        _autoLock = new AutoLockService();
+        _autoLock.IdleTimeoutReached += async () => await ShowPinLockAsync();
+
+        var settings = AppSettingsService.Load();
+        _autoLock.Configure(settings.PinHash != null ? settings.AutoLockMinutes : 0);
     }
 
-    private void ClearSession()
+    private void RegisterHotkeys()
     {
-        try { if (File.Exists(SessionFilePath)) File.Delete(SessionFilePath); }
-        catch { /* non-fatal */ }
+        if (_hotkeys is null) return;
+        _hotkeys.UnregisterAll();
+
+        var settings = AppSettingsService.Load();
+        _hotkeys.Register(settings.GlobalHotkey, () =>
+        {
+            Dispatcher.UIThread.Post(() => { Show(); Activate(); });
+        });
+
+        foreach (var page in MainViewControl.Pages)
+        {
+            if (string.IsNullOrWhiteSpace(page.Hotkey)) continue;
+            var pageId = page.Id;
+            _hotkeys.Register(page.Hotkey!, () =>
+            {
+                Dispatcher.UIThread.Post(() => { Show(); Activate(); });
+            });
+        }
+
+        _autoLock?.Configure(settings.PinHash != null ? settings.AutoLockMinutes : 0);
     }
+
+    private async Task ShowPinLockAsync()
+    {
+        var settings = AppSettingsService.Load();
+        if (string.IsNullOrEmpty(settings.PinHash)) return;
+
+        Hide();
+        var dlg = new PinLockWindow(settings);
+        var unlocked = await dlg.ShowDialog<bool>(this);
+        while (!unlocked)
+        {
+            dlg = new PinLockWindow(settings);
+            unlocked = await dlg.ShowDialog<bool>(this);
+        }
+        _autoLock?.NotifyUnlocked();
+        Show();
+        Activate();
+    }
+
+    // ---------------- update banner (unchanged behavior) ----------------
 
     private async Task CheckForUpdateAsync()
     {
