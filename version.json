@@ -1,4 +1,4 @@
 {
-  "version": "2.5.5",
-  "notes": "Pinbox no longer disappears after you send a message - it stays visible and pastes into the app you were last using. The search box is now a single clean box (no more box-inside-a-box). And Light/Dark/System now switches instantly the moment you click it, no need to press Save."
+  "version": "2.5.6",
+  "notes": "The right-click menu now has clean icons for every action, a mauve Delete, and no more stray orange lines - the menu's separators and highlight used to pick up your Windows accent color, and now stay on Pinbox's own purple in both light and dark."
 }

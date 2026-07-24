@@ -459,36 +459,63 @@ public partial class MainView : UserControl
         return root;
     }
 
+    // Line-icon geometries (24x24 viewBox, stroked) for the right-click menu.
+    private const string IcView = "M2 12s3.6-6.5 10-6.5 10 6.5 10 6.5-3.6 6.5-10 6.5-10-6.5-10-6.5z M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6z";
+    private const string IcEdit = "M13 20h8 M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4z";
+    private const string IcCopy = "M9 9h9v9h-9z M5 15V6a2 2 0 0 1 2-2h8";
+    private const string IcDuplicate = "M9 9h9v9h-9z M5 15V6a2 2 0 0 1 2-2h8";
+    private const string IcUp = "M12 19V5 M6 11l6-6 6 6";
+    private const string IcDown = "M12 5v14 M6 13l6 6 6-6";
+    private const string IcTrash = "M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13";
+
+    private Control MenuIcon(string geometry, IBrush? stroke)
+    {
+        return new Avalonia.Controls.Shapes.Path
+        {
+            Data = Geometry.Parse(geometry),
+            Stroke = stroke,
+            StrokeThickness = 1.6,
+            StrokeLineCap = PenLineCap.Round,
+            StrokeJoin = PenLineJoin.Round,
+            Width = 15,
+            Height = 15,
+            Stretch = Stretch.Uniform,
+        };
+    }
+
     private ContextMenu BuildItemContextMenu(PinboxPage page, PinboxItem item)
     {
+        var dim = Brush("TextDimBrush");
+        var mauve = Brush("MauveBrush");
+
         var menu = new ContextMenu();
         var items = new List<object>();
 
-        var view = new MenuItem { Header = Loc.T("view") };
+        var view = new MenuItem { Header = Loc.T("view"), Icon = MenuIcon(IcView, dim) };
         view.Click += (_, _) => ViewItem(item);
-        var edit = new MenuItem { Header = Loc.T("edit") };
+        var edit = new MenuItem { Header = Loc.T("edit"), Icon = MenuIcon(IcEdit, dim) };
         edit.Click += (_, _) => OpenEditItem(page, item);
-        var copy = new MenuItem { Header = Loc.T("copy") };
+        var copy = new MenuItem { Header = Loc.T("copy"), Icon = MenuIcon(IcCopy, dim) };
         copy.Click += async (_, _) => await CopyItemAsync(item);
-        var duplicate = new MenuItem { Header = Loc.T("duplicate") };
+        var duplicate = new MenuItem { Header = Loc.T("duplicate"), Icon = MenuIcon(IcDuplicate, dim) };
         duplicate.Click += (_, _) =>
         {
             _pages = PageStore.DuplicateItem(_session!.UserId, page.Id, item.Id);
             RenderItems();
         };
-        var moveUp = new MenuItem { Header = Loc.T("move_up") };
+        var moveUp = new MenuItem { Header = Loc.T("move_up"), Icon = MenuIcon(IcUp, dim) };
         moveUp.Click += (_, _) =>
         {
             _pages = PageStore.ReorderItem(_session!.UserId, page.Id, item.Id, -1);
             RenderItems();
         };
-        var moveDown = new MenuItem { Header = Loc.T("move_down") };
+        var moveDown = new MenuItem { Header = Loc.T("move_down"), Icon = MenuIcon(IcDown, dim) };
         moveDown.Click += (_, _) =>
         {
             _pages = PageStore.ReorderItem(_session!.UserId, page.Id, item.Id, 1);
             RenderItems();
         };
-        var delete = new MenuItem { Header = Loc.T("delete") };
+        var delete = new MenuItem { Header = Loc.T("delete"), Icon = MenuIcon(IcTrash, mauve), Foreground = mauve };
         delete.Click += (_, _) =>
         {
             _pages = PageStore.DeleteItem(_session!.UserId, page.Id, item.Id);
