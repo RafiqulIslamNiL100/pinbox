@@ -25,12 +25,11 @@
     <!-- toolbar -->
     <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="14,8">
       <Border Grid.Column="0" x:Name="SearchBoxBorder" Background="{DynamicResource BgBrush}" BorderBrush="{DynamicResource BorderBrush2}"
-              BorderThickness="1" CornerRadius="9" Padding="10,7" Margin="0,0,8,0">
+              BorderThickness="1" CornerRadius="9" Padding="12,8" Margin="0,0,8,0">
         <Grid ColumnDefinitions="Auto,*">
-          <TextBlock Grid.Column="0" Text="🔍" FontSize="11.5" VerticalAlignment="Center" Margin="0,0,7,0" Foreground="{DynamicResource TextFaintBrush}"/>
-          <TextBox Grid.Column="1" x:Name="SearchBox" Watermark="Search items…" TextChanged="OnSearchChanged"
-                    GotFocus="OnSearchFocus" LostFocus="OnSearchUnfocus"
-                    Background="Transparent" BorderThickness="0" Padding="0" MinHeight="0"/>
+          <TextBlock Grid.Column="0" Text="🔍" FontSize="11.5" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextFaintBrush}"/>
+          <TextBox Grid.Column="1" x:Name="SearchBox" Classes="plain" Watermark="Search items…" TextChanged="OnSearchChanged"
+                    VerticalAlignment="Center"/>
         </Grid>
       </Border>
       <ToggleButton Grid.Column="1" x:Name="MultiSelectToggle" Content="☑" FontSize="13" Padding="7,5" Margin="0,0,8,0"

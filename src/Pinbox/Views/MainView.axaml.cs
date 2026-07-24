@@ -35,11 +35,26 @@ public partial class MainView : UserControl
     {
         InitializeComponent();
         Loc.LanguageChanged += OnLanguageChanged;
+        ThemeService.ThemeChanged += OnThemeChanged;
+    }
+
+    private void OnThemeChanged()
+    {
+        // Rows and tabs are built in code-behind with brush instances captured
+        // at render time, so a resource swap doesn't reach them - rebuild.
+        if (_session is null) return;
+        RenderPageTabs();
+        RenderItems();
     }
 
     public void Initialize(Window owner) => _owner = owner;
 
-    private IBrush? Brush(string key) => this.TryFindResource(key, out var v) ? v as IBrush : null;
+    // Theme-aware lookup: resolves against the control's *actual* current
+    // theme variant, so brushes built in code match whichever theme is live.
+    // (The plain 2-arg TryFindResource ignores the theme variant, which is
+    // why an earlier version rendered dark-theme brushes under a light theme.)
+    private IBrush? Brush(string key) =>
+        this.TryFindResource(key, ActualThemeVariant, out var v) ? v as IBrush : null;
 
     public void EnterAs(AuthSession session)
     {
@@ -192,26 +207,6 @@ public partial class MainView : UserControl
     // ---------------- item list ----------------
 
     private void OnSearchChanged(object? sender, TextChangedEventArgs e) => RenderItems();
-
-    private void OnSearchFocus(object? sender, GotFocusEventArgs e)
-    {
-        SearchBoxBorder.BorderBrush = Brush("AccentBrush");
-        if (Brush("AccentBrush") is SolidColorBrush accent)
-        {
-            var c = accent.Color;
-            SearchBoxBorder.BoxShadow = new BoxShadows(new BoxShadow
-            {
-                OffsetX = 0, OffsetY = 0, Blur = 0, Spread = 3,
-                Color = Color.FromArgb(46, c.R, c.G, c.B),
-            });
-        }
-    }
-
-    private void OnSearchUnfocus(object? sender, RoutedEventArgs e)
-    {
-        SearchBoxBorder.BorderBrush = Brush("BorderBrush2");
-        SearchBoxBorder.BoxShadow = default;
-    }
 
     private void RenderItems()
     {

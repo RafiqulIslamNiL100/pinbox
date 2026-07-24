@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private HotkeyService? _hotkeys;
     private AutoLockService? _autoLock;
     private DispatcherTimer? _licenseTimer;
+    private DispatcherTimer? _foregroundTracker;
 
     public MainWindow()
     {
@@ -159,6 +160,26 @@ public partial class MainWindow : Window
 
         var settings = AppSettingsService.Load();
         _autoLock.Configure(settings.PinHash != null ? settings.AutoLockMinutes : 0);
+
+        StartForegroundTracking();
+    }
+
+    // Continuously remember the last window the user was focused on that
+    // ISN'T Pinbox. When they click a saved item to send it, PasteService
+    // switches focus back to this window and pastes there - which is how
+    // Pinbox can send into the app you were just using without hiding itself.
+    private void StartForegroundTracking()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        _foregroundTracker = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+        _foregroundTracker.Tick += (_, _) =>
+        {
+            var mine = TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
+            var fg = PasteService.CurrentForegroundWindow();
+            if (fg != IntPtr.Zero && fg != mine)
+                PasteService.LastExternalWindow = fg;
+        };
+        _foregroundTracker.Start();
     }
 
     private void RegisterHotkeys()

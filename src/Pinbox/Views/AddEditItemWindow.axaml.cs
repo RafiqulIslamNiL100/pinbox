@@ -72,7 +72,8 @@ public partial class AddEditItemWindow : Window
     private void OnTextTypeClick(object? sender, RoutedEventArgs e) => SetMode(false);
     private void OnPicTypeClick(object? sender, RoutedEventArgs e) => SetMode(true);
 
-    private IBrush? Brush(string key) => this.TryFindResource(key, out var v) ? v as IBrush : null;
+    private IBrush? Brush(string key) =>
+        this.TryFindResource(key, ActualThemeVariant, out var v) ? v as IBrush : null;
 
     private void RenderLabelChips()
     {

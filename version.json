@@ -1,4 +1,4 @@
 {
-  "version": "2.5.1",
-  "notes": "Fixed self-updating for real: 'Update now' now downloads and silently runs the actual installer (the same one you'd run by hand) instead of hand-copying files, then relaunches Pinbox automatically. This is what manual reinstalls were doing correctly all along - the in-app button now does the same thing."
+  "version": "2.5.5",
+  "notes": "Pinbox no longer disappears after you send a message - it stays visible and pastes into the app you were last using. The search box is now a single clean box (no more box-inside-a-box). And Light/Dark/System now switches instantly the moment you click it, no need to press Save."
 }

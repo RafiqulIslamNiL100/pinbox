@@ -5,6 +5,32 @@
   <Application.Styles>
     <FluentTheme />
 
+    <!-- chromeless text box: strips FluentTheme's own background, border and
+         the accent-colored focus underline in every state, so a TextBox
+         placed inside our own rounded search container reads as one clean
+         box instead of a box-inside-a-box. -->
+    <Style Selector="TextBox.plain">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="MinHeight" Value="0"/>
+    </Style>
+    <Style Selector="TextBox.plain /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox.plain:pointerover /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox.plain:focus /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
     <!-- small pill toggle switch, used instead of default checkboxes -->
     <Style Selector="ToggleButton.switch">
       <Setter Property="Width" Value="36"/>
@@ -86,33 +112,77 @@
     </Style>
   </Application.Styles>
 
-  <!-- Flat (non-theme-dictionary) resources. ThemeService swaps every value
-       here in code when the user changes Light/Dark/System - a plain
-       ResourceDictionary like this is what both XAML {DynamicResource ...}
-       AND code-behind resource lookups (TryFindResource) reliably react to.
-       (ResourceDictionary.ThemeDictionaries looks like the "proper" Avalonia
-       way to do this, but code-behind lookups don't reliably resolve
-       resources nested inside it, which silently made every brush built in
-       C# null - invisible icons and text. Flat resources sidestep that.) -->
+  <!-- Theme-scoped resources. RequestedThemeVariant (set by ThemeService)
+       drives which dictionary is live, and Avalonia re-resolves every
+       {DynamicResource ...} in every window automatically when it changes -
+       at startup and on a live switch, for the main window and every dialog
+       alike. Code-behind reads these with a theme-aware lookup
+       (TryFindResource(key, ActualThemeVariant, out _) in MainView.Brush) so
+       C#-built visuals resolve the same values. Overriding the FluentTheme
+       SystemAccentColor ramp here keeps native controls (toggle switches,
+       focus states) on our purple instead of the user's Windows accent. -->
   <Application.Resources>
-    <SolidColorBrush x:Key="BgBrush">#14121D</SolidColorBrush>
-    <SolidColorBrush x:Key="SurfaceBrush">#1C1928</SolidColorBrush>
-    <SolidColorBrush x:Key="Surface2Brush">#262234</SolidColorBrush>
-    <SolidColorBrush x:Key="Surface3Brush">#2B2538</SolidColorBrush>
-    <SolidColorBrush x:Key="BorderBrush2">#383150</SolidColorBrush>
-    <SolidColorBrush x:Key="BorderSoftBrush">#2A2536</SolidColorBrush>
-    <SolidColorBrush x:Key="TextBrush">#ECE9F6</SolidColorBrush>
-    <SolidColorBrush x:Key="TextDimBrush">#A59EBD</SolidColorBrush>
-    <SolidColorBrush x:Key="TextFaintBrush">#6C6580</SolidColorBrush>
-    <SolidColorBrush x:Key="AccentBrush">#A78BFA</SolidColorBrush>
-    <SolidColorBrush x:Key="AccentInkBrush">#1C0F3E</SolidColorBrush>
-    <SolidColorBrush x:Key="AccentSoftBrush">#322A4D</SolidColorBrush>
-    <SolidColorBrush x:Key="MauveBrush">#D99BD0</SolidColorBrush>
-    <SolidColorBrush x:Key="MauveSoftBrush">#35243A</SolidColorBrush>
-    <SolidColorBrush x:Key="GoldBrush">#E0B23F</SolidColorBrush>
-    <SolidColorBrush x:Key="GoldSoftBrush">#3A2F14</SolidColorBrush>
-    <SolidColorBrush x:Key="GoodBrush">#4FD39A</SolidColorBrush>
-    <SolidColorBrush x:Key="GoodSoftBrush">#173A2C</SolidColorBrush>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="BgBrush">#14121D</SolidColorBrush>
+          <SolidColorBrush x:Key="SurfaceBrush">#1C1928</SolidColorBrush>
+          <SolidColorBrush x:Key="Surface2Brush">#262234</SolidColorBrush>
+          <SolidColorBrush x:Key="Surface3Brush">#2B2538</SolidColorBrush>
+          <SolidColorBrush x:Key="BorderBrush2">#383150</SolidColorBrush>
+          <SolidColorBrush x:Key="BorderSoftBrush">#2A2536</SolidColorBrush>
+          <SolidColorBrush x:Key="TextBrush">#ECE9F6</SolidColorBrush>
+          <SolidColorBrush x:Key="TextDimBrush">#A59EBD</SolidColorBrush>
+          <SolidColorBrush x:Key="TextFaintBrush">#6C6580</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentBrush">#A78BFA</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentInkBrush">#1C0F3E</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentSoftBrush">#322A4D</SolidColorBrush>
+          <SolidColorBrush x:Key="MauveBrush">#D99BD0</SolidColorBrush>
+          <SolidColorBrush x:Key="MauveSoftBrush">#35243A</SolidColorBrush>
+          <SolidColorBrush x:Key="GoldBrush">#E0B23F</SolidColorBrush>
+          <SolidColorBrush x:Key="GoldSoftBrush">#3A2F14</SolidColorBrush>
+          <SolidColorBrush x:Key="GoodBrush">#4FD39A</SolidColorBrush>
+          <SolidColorBrush x:Key="GoodSoftBrush">#173A2C</SolidColorBrush>
+          <Color x:Key="SystemAccentColor">#A78BFA</Color>
+          <Color x:Key="SystemAccentColorDark1">#9678E8</Color>
+          <Color x:Key="SystemAccentColorDark2">#8566D1</Color>
+          <Color x:Key="SystemAccentColorDark3">#7454BA</Color>
+          <Color x:Key="SystemAccentColorLight1">#B79FFB</Color>
+          <Color x:Key="SystemAccentColorLight2">#C7B3FC</Color>
+          <Color x:Key="SystemAccentColorLight3">#D7C7FD</Color>
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="BgBrush">#F6F3FB</SolidColorBrush>
+          <SolidColorBrush x:Key="SurfaceBrush">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Surface2Brush">#EFE9F9</SolidColorBrush>
+          <SolidColorBrush x:Key="Surface3Brush">#E4DAF5</SolidColorBrush>
+          <SolidColorBrush x:Key="BorderBrush2">#DDD2EF</SolidColorBrush>
+          <SolidColorBrush x:Key="BorderSoftBrush">#E7E0F5</SolidColorBrush>
+          <SolidColorBrush x:Key="TextBrush">#251F38</SolidColorBrush>
+          <SolidColorBrush x:Key="TextDimBrush">#6D6484</SolidColorBrush>
+          <SolidColorBrush x:Key="TextFaintBrush">#A297B8</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentBrush">#7C5CD9</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentInkBrush">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentSoftBrush">#ECE2FB</SolidColorBrush>
+          <SolidColorBrush x:Key="MauveBrush">#A1478C</SolidColorBrush>
+          <SolidColorBrush x:Key="MauveSoftBrush">#F8E7F3</SolidColorBrush>
+          <SolidColorBrush x:Key="GoldBrush">#A3760A</SolidColorBrush>
+          <SolidColorBrush x:Key="GoldSoftBrush">#FAF0D6</SolidColorBrush>
+          <SolidColorBrush x:Key="GoodBrush">#1F7A4C</SolidColorBrush>
+          <SolidColorBrush x:Key="GoodSoftBrush">#D9F2E6</SolidColorBrush>
+          <Color x:Key="SystemAccentColor">#7C5CD9</Color>
+          <Color x:Key="SystemAccentColorDark1">#6A4BC4</Color>
+          <Color x:Key="SystemAccentColorDark2">#583AAE</Color>
+          <Color x:Key="SystemAccentColorDark3">#472999</Color>
+          <Color x:Key="SystemAccentColorLight1">#8F6EE0</Color>
+          <Color x:Key="SystemAccentColorLight2">#A282E7</Color>
+          <Color x:Key="SystemAccentColorLight3">#B596ED</Color>
+        </ResourceDictionary>
+
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
   </Application.Resources>
 
 </Application>

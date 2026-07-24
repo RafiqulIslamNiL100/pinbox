@@ -53,6 +53,24 @@ public static class PasteService
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
 
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindow(IntPtr hWnd);
+
+    /// The last window that had focus that WASN'T Pinbox itself. A timer in
+    /// MainWindow keeps this current. On send we switch focus back to it and
+    /// paste there - instead of hiding Pinbox - so Pinbox stays visible.
+    public static IntPtr LastExternalWindow { get; set; }
+
+    public static IntPtr CurrentForegroundWindow() => GetForegroundWindow();
+
     private static void SendKeyStroke(ushort vk)
     {
         var inputs = new Input[]
@@ -75,19 +93,19 @@ public static class PasteService
         SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<Input>());
     }
 
-    /// Copies the text to the clipboard, hides Pinbox (which hands focus back
-    /// to whatever window was active before - the same Hide()/Show() pair the
-    /// rest of the app already uses for its tray icon and global hotkey, so
-    /// bringing Pinbox back afterward is guaranteed to work), pastes with
-    /// Ctrl+V, then presses Enter to submit it - the same thing pressing Enter
-    /// does in Messenger, Telegram, Facebook comments, and WhatsApp Web.
+    /// Copies the text to the clipboard, switches focus to the app the user
+    /// was last in (via SetForegroundWindow - allowed because Pinbox itself
+    /// owns the foreground at click time), pastes with Ctrl+V, then presses
+    /// Enter to submit it - the same thing pressing Enter does in Messenger,
+    /// Telegram, Facebook comments, and WhatsApp Web.
     ///
-    /// Using WindowState.Minimized here previously caused the bug where
-    /// Pinbox seemed to vanish after sending: a minimized window doesn't
-    /// reliably come back via Show()+Activate() on Windows, so the hotkey and
-    /// tray icon's "restore" path stopped working. Hide() doesn't have that
-    /// problem because it's the exact mechanism already proven to work for
-    /// bringing the window back.
+    /// Crucially, Pinbox is NOT hidden or minimized here anymore. Earlier
+    /// versions called window.Hide() (and before that Minimize()), which is
+    /// what made Pinbox appear to "close automatically" after every send.
+    /// Because Pinbox owns the foreground when you click an item, it's allowed
+    /// to hand focus to another window with SetForegroundWindow, which is all
+    /// that's needed for the paste to land in the right place - the Pinbox
+    /// window just stays put, unfocused, exactly where it was.
     public static async Task SendTextAsync(Window window, string text)
     {
         if (!OperatingSystem.IsWindows())
@@ -101,12 +119,7 @@ public static class PasteService
             await clipboard.SetTextAsync(text);
         }
 
-        window.Hide();
-        await Task.Delay(300);
-
-        SendCtrlV();
-        await Task.Delay(150);
-        SendKeyStroke(VkReturn);
+        await FocusTargetAndPasteAsync();
 
         if (clipboard is not null && previous is not null)
         {
@@ -115,8 +128,8 @@ public static class PasteService
     }
 
     /// Puts the image file itself on the clipboard (as a copied file, the
-    /// same as copying it in Explorer), hides Pinbox, pastes, then presses
-    /// Enter to submit it - see SendTextAsync for why Hide() replaced Minimize.
+    /// same as copying it in Explorer), switches focus to the last app,
+    /// pastes, then presses Enter - Pinbox stays visible, see SendTextAsync.
     public static async Task SendImageAsync(Window window, string imagePath)
     {
         if (!OperatingSystem.IsWindows())
@@ -138,8 +151,19 @@ public static class PasteService
             await clipboard.SetDataObjectAsync(data);
         }
 
-        window.Hide();
-        await Task.Delay(300);
+        await FocusTargetAndPasteAsync();
+    }
+
+    private static async Task FocusTargetAndPasteAsync()
+    {
+        var target = LastExternalWindow;
+        if (target != IntPtr.Zero && IsWindow(target))
+        {
+            SetForegroundWindow(target);
+            // Give Windows a moment to actually complete the focus switch
+            // before the keystrokes go out, otherwise they can land on Pinbox.
+            await Task.Delay(120);
+        }
 
         SendCtrlV();
         await Task.Delay(150);

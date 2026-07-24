@@ -64,6 +64,17 @@ public partial class SettingsWindow : Window
         AccountPanel.IsVisible = true;
     }
 
+    private string SelectedTheme =>
+        ThemeDarkBtn.IsChecked == true ? "Dark" : ThemeLightBtn.IsChecked == true ? "Light" : "System";
+
+    // Apply the theme the instant a Light/Dark/System pill is clicked, so the
+    // whole app switches live - the user shouldn't have to press Save to see
+    // it. Save still persists it so the choice survives a restart.
+    private void OnThemeClick(object? sender, RoutedEventArgs e)
+    {
+        ThemeService.Apply(SelectedTheme);
+    }
+
     private void OnSaveGeneral(object? sender, RoutedEventArgs e)
     {
         var newHotkey = (HotkeyBox.Text ?? "").Trim();
@@ -73,7 +84,7 @@ public partial class SettingsWindow : Window
         _settings.StartWithWindows = AutoStartToggle.IsChecked == true;
         _settings.CompactModeDefault = CompactToggle.IsChecked == true;
         _settings.NotificationsEnabled = NotifToggle.IsChecked == true;
-        _settings.Theme = ThemeDarkBtn.IsChecked == true ? "Dark" : ThemeLightBtn.IsChecked == true ? "Light" : "System";
+        _settings.Theme = SelectedTheme;
 
         AppSettingsService.Save(_settings);
         AppSettingsService.SetStartWithWindows(_settings.StartWithWindows);
