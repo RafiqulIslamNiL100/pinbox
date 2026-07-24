@@ -6,16 +6,18 @@ focused on (a browser comment box, an email client, a chat app, etc.).
 
 ## Download and install
 
-**[Download Pinbox-for-Windows.zip](./Pinbox-for-Windows.zip)** — that's
-the whole app, no installer required, no other downloads needed.
+**[Download Pinbox-Setup.exe](./Pinbox-Setup.exe)** and run it — a normal
+Windows installer wizard: Welcome → choose folder → Install → Finish. It
+creates a Desktop shortcut, a Start Menu entry (with an uninstaller), and
+launches Pinbox when done. No admin rights needed (installs to your user
+profile), no other downloads required.
 
-1. Extract the zip
-2. Double-click **`Install Pinbox.bat`** inside it
+Windows SmartScreen may show an "unrecognized app" warning the first run
+since it isn't code-signed — click "More info" → "Run anyway".
 
-That copies Pinbox to your PC, creates a Desktop and Start Menu shortcut,
-and launches it. Windows SmartScreen may show an "unrecognized app"
-warning the first run since it isn't code-signed — click "More info" →
-"Run anyway".
+(There's also **[Pinbox-for-Windows.zip](./Pinbox-for-Windows.zip)** — a
+portable version if you'd rather extract and run `Install Pinbox.bat`
+yourself instead of using the installer. Both contain the same app.)
 
 ## How it works
 
@@ -35,6 +37,12 @@ warning the first run since it isn't code-signed — click "More info" →
 - **Self-update**: on launch, Pinbox checks this repo's `version.json`. If
   a newer version is published, a banner offers to update — it downloads
   `Pinbox-for-Windows.zip`, swaps the installed files, and relaunches.
+- **The installer** (`Pinbox-Setup.exe`) is built with NSIS, compiled via
+  the standalone Linux `makensis` (Ubuntu's `nsis` package) — not
+  electron-builder's Node wrapper, which downloads a code-signing toolkit
+  that fails to extract without a Windows privilege some accounts don't
+  have. `makensis` needs nothing beyond itself, so that problem doesn't
+  apply here. See `installer/pinbox.nsi`.
 
 ## Building it yourself
 
@@ -46,20 +54,24 @@ cd pinbox
 build-installer.bat
 ```
 
-That produces `Pinbox-for-Windows.zip` in the project root — the same
-file linked at the top of this README.
+That produces `Pinbox-for-Windows.zip` in the project root (the portable
+version). To also build `Pinbox-Setup.exe`, install
+[NSIS](https://nsis.sourceforge.io/Download) and run:
 
-Or manually:
-```bash
-dotnet publish src/Pinbox/Pinbox.csproj -r win-x64 -c Release --self-contained true -o publish-output
 ```
+makensis installer\pinbox.nsi
+```
+
+(this repo's copy was built with the standalone `makensis` on Linux, but
+the Windows NSIS install works the same way.)
 
 ## Publishing an update
 
 1. Bump `<Version>` in `src/Pinbox/Pinbox.csproj` and the `version` field
    in `version.json` (must match)
-2. Run `build-installer.bat`
-3. Commit and push `Pinbox-for-Windows.zip` and `version.json`
+2. Run `build-installer.bat`, then `makensis installer\pinbox.nsi`
+3. Commit and push `Pinbox-Setup.exe`, `Pinbox-for-Windows.zip`, and
+   `version.json`
 
 Anyone with Pinbox already installed will see the update banner next time
 they open it.
