@@ -59,6 +59,36 @@ public static class ThemeService
         ["GoodSoftBrush"] = Color.Parse("#D9F2E6"),
     };
 
+    // FluentTheme's own built-in controls (a checked ToggleButton, a
+    // focused TextBox's underline, selected text in any TextBox, etc.) don't
+    // read our custom brushes above - they read these specific keys, which
+    // Avalonia otherwise fills in from the *Windows* system accent color.
+    // Left alone, anyone whose Windows accent color is red (or any non-purple
+    // color) sees that color bleed through on every control we didn't
+    // hand-restyle ourselves. Overriding these forces every native FluentTheme
+    // control back onto our own palette regardless of the user's OS setting.
+    private static readonly Dictionary<string, Color> DarkAccentRamp = new()
+    {
+        ["SystemAccentColor"] = Color.Parse("#A78BFA"),
+        ["SystemAccentColorDark1"] = Color.Parse("#9678E8"),
+        ["SystemAccentColorDark2"] = Color.Parse("#8566D1"),
+        ["SystemAccentColorDark3"] = Color.Parse("#7454BA"),
+        ["SystemAccentColorLight1"] = Color.Parse("#B79FFB"),
+        ["SystemAccentColorLight2"] = Color.Parse("#C7B3FC"),
+        ["SystemAccentColorLight3"] = Color.Parse("#D7C7FD"),
+    };
+
+    private static readonly Dictionary<string, Color> LightAccentRamp = new()
+    {
+        ["SystemAccentColor"] = Color.Parse("#7C5CD9"),
+        ["SystemAccentColorDark1"] = Color.Parse("#6A4BC4"),
+        ["SystemAccentColorDark2"] = Color.Parse("#583AAE"),
+        ["SystemAccentColorDark3"] = Color.Parse("#472999"),
+        ["SystemAccentColorLight1"] = Color.Parse("#8F6EE0"),
+        ["SystemAccentColorLight2"] = Color.Parse("#A282E7"),
+        ["SystemAccentColorLight3"] = Color.Parse("#B596ED"),
+    };
+
     public static void Apply(string theme)
     {
         if (Application.Current is null) return;
@@ -76,6 +106,14 @@ public static class ThemeService
         foreach (var (key, color) in palette)
         {
             Application.Current.Resources[key] = new SolidColorBrush(color);
+        }
+
+        // These are Color resources, not Brush ones - FluentTheme's own
+        // styles build brushes out of them internally.
+        var accentRamp = useLight ? LightAccentRamp : DarkAccentRamp;
+        foreach (var (key, color) in accentRamp)
+        {
+            Application.Current.Resources[key] = color;
         }
     }
 

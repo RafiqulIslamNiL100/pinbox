@@ -1,4 +1,4 @@
 {
-  "version": "2.0.1",
-  "notes": "Redesign: denser purple-only interface, a working right-click menu (view/edit/copy/duplicate/move/delete), one-click send that pastes and auto-submits, modern toggle and segmented controls in Settings, real Light/Dark/System theming, and a fix for Pinbox disappearing after sending."
+  "version": "2.5.0",
+  "notes": "Fixed a real crash on send: SendInput's Windows struct was undersized, corrupting memory - now correctly sized. Also fixed red bleeding through from your Windows accent color on toggle switches and focus states (now always purple regardless of OS theme color), and a self-update bug that silently updated the wrong folder for portable installs."
 }

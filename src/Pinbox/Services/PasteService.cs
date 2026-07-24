@@ -27,7 +27,17 @@ public static class PasteService
         public IntPtr dwExtraInfo;
     }
 
-    [StructLayout(LayoutKind.Explicit)]
+    // Win32's actual INPUT union is sized to fit its largest member,
+    // MOUSEINPUT (32 bytes on 64-bit Windows) - not KEYBDINPUT (24 bytes).
+    // Without the explicit Size below, Marshal.SizeOf<Input> comes out
+    // smaller than the real native INPUT struct, so SendInput reads/writes
+    // past the end of each element when striding through the array - memory
+    // corruption that surfaces as a hard, uncatchable process crash (an
+    // access violation, not a .NET exception - no try/catch can stop it).
+    // This was the real cause of Pinbox crashing on send: every call here
+    // sends 2-4 elements, and the corruption became more likely once Enter
+    // was added as a second SendInput call after Ctrl+V.
+    [StructLayout(LayoutKind.Explicit, Size = 32)]
     private struct InputUnion
     {
         [FieldOffset(0)] public KeybdInput ki;
@@ -100,10 +110,7 @@ public static class PasteService
 
         if (clipboard is not null && previous is not null)
         {
-            _ = Task.Delay(600).ContinueWith(async _ =>
-            {
-                try { await clipboard.SetTextAsync(previous); } catch { /* best effort */ }
-            });
+            _ = RestoreClipboardLaterAsync(clipboard, previous);
         }
     }
 
@@ -137,5 +144,17 @@ public static class PasteService
         SendCtrlV();
         await Task.Delay(150);
         SendKeyStroke(VkReturn);
+    }
+
+    // A plain async method awaited fire-and-forget (rather than
+    // Task.Delay(...).ContinueWith(async _ => ...)) so any failure is
+    // contained entirely within its own try/catch - a ContinueWith callback
+    // that itself returns a Task creates a nested, never-awaited inner task,
+    // which is exactly the kind of thing that can end up as an unobserved
+    // task exception.
+    private static async Task RestoreClipboardLaterAsync(IClipboard clipboard, string previous)
+    {
+        await Task.Delay(600);
+        try { await clipboard.SetTextAsync(previous); } catch { /* best effort */ }
     }
 }
