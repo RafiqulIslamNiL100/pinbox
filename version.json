@@ -1,4 +1,4 @@
 {
-  "version": "2.7.0",
-  "notes": "Premium sign-in, sign-up and activation screens with a richer gradient button style, every emoji in the app replaced with clean minimal line icons, and the Settings hotkey/PIN fields redesigned in the purple theme instead of a plain white box."
+  "version": "2.7.1",
+  "notes": "Removed the icon from the Pinbox logo mark, and centered the Global hotkey field's text in a cleaner font colored to match its description text instead of a monospace code style. Also fixed the Account & data tab's Sign out button overlapping the Account label."
 }

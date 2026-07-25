@@ -6,11 +6,6 @@
     <!-- appbar: brand + page tabs + new page -->
     <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="14,10,14,8">
       <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center" Margin="0,0,10,0">
-        <Border Width="20" Height="20" CornerRadius="5" Background="{DynamicResource AccentBrush}">
-          <Path Data="M12 2a5 5 0 0 0-5 5c0 3 5 11 5 11s5-8 5-11a5 5 0 0 0-5-5z M12 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"
-                Stroke="{DynamicResource AccentInkBrush}" StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round"
-                Width="11" Height="11" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </Border>
         <TextBlock Text="Pinbox" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextBrush}"/>
       </StackPanel>
 
