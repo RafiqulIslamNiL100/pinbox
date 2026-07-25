@@ -5,7 +5,10 @@
     <StackPanel Spacing="0">
       <Border Width="44" Height="44" CornerRadius="11" Background="{DynamicResource GoldSoftBrush}"
               HorizontalAlignment="Left" Margin="0,0,0,16">
-        <TextBlock Text="🔒" FontSize="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Path Data="M6 11V8a6 6 0 1 1 12 0v3 M5 11h14v9H5z" Stroke="{DynamicResource GoldBrush}"
+              StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round"
+              Width="18" Height="18" Stretch="Uniform"
+              HorizontalAlignment="Center" VerticalAlignment="Center"/>
       </Border>
 
       <TextBlock x:Name="TitleText" Text="Enter your key" FontSize="20" FontWeight="SemiBold"
@@ -21,11 +24,10 @@
 
       <TextBlock x:Name="KeyLabel" Text="Unique key" FontSize="11.5" FontWeight="SemiBold"
                  Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
-      <TextBox x:Name="KeyBox" Watermark="XXXX-XXXX-XXXX-XXXX" FontFamily="Consolas" Margin="0,0,0,4"/>
+      <TextBox x:Name="KeyBox" Classes="field" Watermark="XXXX-XXXX-XXXX-XXXX" FontFamily="Consolas" Margin="0,0,0,4"/>
 
-      <Button x:Name="ActivateButton" Content="Activate" HorizontalAlignment="Stretch" Margin="0,16,0,0"
-              Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}"
-              FontWeight="SemiBold" Padding="0,11" CornerRadius="7" Click="OnActivateClick"/>
+      <Button x:Name="ActivateButton" Content="Activate" HorizontalAlignment="Stretch" Margin="0,20,0,0"
+              Classes="premium" Click="OnActivateClick"/>
 
       <TextBlock x:Name="SignOutLink" Text="Sign out" FontSize="12" Foreground="{DynamicResource TextDimBrush}"
                  TextDecorations="Underline" HorizontalAlignment="Center" Margin="0,16,0,0"

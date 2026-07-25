@@ -7,7 +7,9 @@
     <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="14,10,14,8">
       <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center" Margin="0,0,10,0">
         <Border Width="20" Height="20" CornerRadius="5" Background="{DynamicResource AccentBrush}">
-          <TextBlock Text="📌" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          <Path Data="M12 2a5 5 0 0 0-5 5c0 3 5 11 5 11s5-8 5-11a5 5 0 0 0-5-5z M12 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"
+                Stroke="{DynamicResource AccentInkBrush}" StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round"
+                Width="11" Height="11" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Border>
         <TextBlock Text="Pinbox" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextBrush}"/>
       </StackPanel>
@@ -27,13 +29,19 @@
       <Border Grid.Column="0" x:Name="SearchBoxBorder" Background="{DynamicResource BgBrush}" BorderBrush="{DynamicResource BorderBrush2}"
               BorderThickness="1" CornerRadius="9" Padding="12,8" Margin="0,0,8,0">
         <Grid ColumnDefinitions="Auto,*">
-          <TextBlock Grid.Column="0" Text="🔍" FontSize="11.5" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextFaintBrush}"/>
+          <Path Grid.Column="0" Data="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z M21 21l-4.3-4.3"
+                Stroke="{DynamicResource TextFaintBrush}" StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round"
+                Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
           <TextBox Grid.Column="1" x:Name="SearchBox" Classes="plain" Watermark="Search items…" TextChanged="OnSearchChanged"
                     VerticalAlignment="Center"/>
         </Grid>
       </Border>
-      <ToggleButton Grid.Column="1" x:Name="MultiSelectToggle" Content="☑" FontSize="13" Padding="7,5" Margin="0,0,8,0"
-                    Click="OnMultiSelectToggle"/>
+      <ToggleButton Grid.Column="1" x:Name="MultiSelectToggle" Padding="7,5" Margin="0,0,8,0"
+                    Click="OnMultiSelectToggle">
+        <Path Data="M4 4h16v16H4z M8 12l3 3 6-6" Stroke="{DynamicResource TextDimBrush}"
+              StrokeThickness="1.7" StrokeLineCap="Round" StrokeJoin="Round"
+              Width="13" Height="13" Stretch="Uniform"/>
+      </ToggleButton>
       <Button Grid.Column="2" x:Name="AddItemButton" Content="+ Add item" Click="OnAddItemClick"
               Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}"
               FontWeight="SemiBold" Padding="14,7" CornerRadius="7"/>
@@ -50,15 +58,24 @@
       <Border Height="1" Background="{DynamicResource BorderBrush2}" VerticalAlignment="Top"/>
       <Grid ColumnDefinitions="Auto,*,Auto" Margin="12,7">
         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
-          <TextBlock x:Name="FolderButton" Text="🗀" FontSize="14" Padding="6" Cursor="Hand"
-                     PointerPressed="OnOpenFolderClick" Foreground="{DynamicResource TextDimBrush}"/>
-          <TextBlock x:Name="EyeButton" Text="👁" FontSize="14" Padding="6" Cursor="Hand"
-                     PointerPressed="OnToggleRevealClick" Foreground="{DynamicResource TextDimBrush}"/>
+          <Border x:Name="FolderButton" Background="Transparent" Padding="6" Cursor="Hand" PointerPressed="OnOpenFolderClick">
+            <Path Data="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                  Stroke="{DynamicResource TextDimBrush}" StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round"
+                  Width="14" Height="14" Stretch="Uniform"/>
+          </Border>
+          <Border x:Name="EyeButton" Background="Transparent" Padding="6" Cursor="Hand" PointerPressed="OnToggleRevealClick">
+            <Path x:Name="EyeIcon" Data="M2 12s3.6-6.5 10-6.5 10 6.5 10 6.5-3.6 6.5-10 6.5-10-6.5-10-6.5z M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6z"
+                  Stroke="{DynamicResource TextDimBrush}" StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round"
+                  Width="14" Height="14" Stretch="Uniform"/>
+          </Border>
         </StackPanel>
         <TextBlock Grid.Column="1" x:Name="MsgCount" Text="0 saved items" FontSize="11" HorizontalAlignment="Center"
                    Foreground="{DynamicResource TextDimBrush}" VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="2" x:Name="SettingsButton" Text="⚙" FontSize="14" Padding="6" Cursor="Hand"
-                   PointerPressed="OnSettingsClick" Foreground="{DynamicResource TextDimBrush}"/>
+        <Border Grid.Column="2" x:Name="SettingsButton" Background="Transparent" Padding="6" Cursor="Hand" PointerPressed="OnSettingsClick">
+          <Path Data="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"
+                Stroke="{DynamicResource TextDimBrush}" StrokeThickness="1.4" StrokeLineCap="Round" StrokeJoin="Round"
+                Width="14" Height="14" Stretch="Uniform"/>
+        </Border>
       </Grid>
     </Grid>
 

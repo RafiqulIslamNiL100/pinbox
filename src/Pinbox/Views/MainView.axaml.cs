@@ -13,6 +13,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Pinbox.Models;
 using Pinbox.Services;
 
@@ -296,16 +297,14 @@ public partial class MainView : UserControl
                 BorderBrush = Brush("BorderBrush2"),
                 BorderThickness = new Thickness(1.3),
                 VerticalAlignment = VerticalAlignment.Center,
-                Child = isSelected ? new TextBlock { Text = "✓", FontSize = 9, Foreground = accentInk, HorizontalAlignment = HorizontalAlignment.Center } : null,
+                Child = isSelected ? MenuIcon(IcCheck, accentInk, 10) : null,
             };
         }
         else
         {
-            leading = new TextBlock
+            leading = new ContentControl
             {
-                Text = item.IsFavorite ? "★" : "☆",
-                Foreground = item.IsFavorite ? gold : textFaint,
-                FontSize = 12,
+                Content = MenuIcon(IcStarOutline, item.IsFavorite ? gold : textFaint, 12, fill: item.IsFavorite ? gold : null),
                 VerticalAlignment = VerticalAlignment.Center,
                 Cursor = new Cursor(StandardCursorType.Hand),
             };
@@ -332,7 +331,12 @@ public partial class MainView : UserControl
             }
             else
             {
-                img.Child = new TextBlock { Text = "🔒", FontSize = 10, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+                img.Child = new ContentControl
+                {
+                    Content = MenuIcon(IcLock, textFaint, 11),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                };
             }
             typeIcon = img;
         }
@@ -433,7 +437,10 @@ public partial class MainView : UserControl
                 return;
             }
 
-            if (leading == e.Source)
+            // leading now wraps its star/checkbox icon in a child Path, so the
+            // pointer event's Source is that Path, not the leading control
+            // itself - walk up the visual tree instead of an exact match.
+            if (e.Source is Visual sourceVisual && (sourceVisual == leading || sourceVisual.GetVisualAncestors().Contains(leading)))
             {
                 _pages = PageStore.ToggleFavorite(_session!.UserId, page.Id, item.Id);
                 RenderItems();
@@ -460,7 +467,8 @@ public partial class MainView : UserControl
         return root;
     }
 
-    // Line-icon geometries (24x24 viewBox, stroked) for the right-click menu.
+    // Line-icon geometries (24x24 viewBox, stroked) for the right-click menu
+    // and other small in-app glyphs that used to be emoji.
     private const string IcView = "M2 12s3.6-6.5 10-6.5 10 6.5 10 6.5-3.6 6.5-10 6.5-10-6.5-10-6.5z M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6z";
     private const string IcEdit = "M13 20h8 M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4z";
     private const string IcCopy = "M9 9h9v9h-9z M5 15V6a2 2 0 0 1 2-2h8";
@@ -468,18 +476,22 @@ public partial class MainView : UserControl
     private const string IcUp = "M12 19V5 M6 11l6-6 6 6";
     private const string IcDown = "M12 5v14 M6 13l6 6 6-6";
     private const string IcTrash = "M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13";
+    private const string IcCheck = "M4 12l5 5 11-11";
+    private const string IcStarOutline = "M12 3l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2-5.6-3.3-5.6 3.3 1.4-6.2-4.8-4.3 6.4-.6z";
+    private const string IcLock = "M6 11V8a6 6 0 1 1 12 0v3 M5 11h14v9H5z";
 
-    private Control MenuIcon(string geometry, IBrush? stroke)
+    private Control MenuIcon(string geometry, IBrush? stroke, double size = 15, IBrush? fill = null)
     {
         return new Avalonia.Controls.Shapes.Path
         {
             Data = Geometry.Parse(geometry),
             Stroke = stroke,
+            Fill = fill,
             StrokeThickness = 1.6,
             StrokeLineCap = PenLineCap.Round,
             StrokeJoin = PenLineJoin.Round,
-            Width = 15,
-            Height = 15,
+            Width = size,
+            Height = size,
             Stretch = Stretch.Uniform,
         };
     }
@@ -698,10 +710,13 @@ public partial class MainView : UserControl
         catch { /* non-fatal */ }
     }
 
+    private const string IcEyeOpen = "M2 12s3.6-6.5 10-6.5 10 6.5 10 6.5-3.6 6.5-10 6.5-10-6.5-10-6.5z M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6z";
+    private const string IcEyeOff = "M3 3l18 18 M10.6 10.6a3 3 0 0 0 4.24 4.24 M9.9 5.1A10.5 10.5 0 0 1 12 5c6.4 0 10 6.5 10 6.5a13.2 13.2 0 0 1-3.1 3.8 M6.3 6.3A13.4 13.4 0 0 0 2 11.5S5.6 18 12 18a10.4 10.4 0 0 0 3.3-.5";
+
     private void OnToggleRevealClick(object? sender, PointerPressedEventArgs e)
     {
         _revealPictures = !_revealPictures;
-        EyeButton.Text = _revealPictures ? "👁" : "🚫";
+        EyeIcon.Data = Geometry.Parse(_revealPictures ? IcEyeOpen : IcEyeOff);
         RenderItems();
     }
 

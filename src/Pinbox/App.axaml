@@ -140,6 +140,79 @@
     <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
     </Style>
+
+    <!-- premium primary action button - Sign in / Sign up / Activate. A
+         soft gradient plus a hairline highlight border reads as a deliberate,
+         elevated action instead of a flat FluentTheme button, and the
+         pointerover/pressed states nudge brightness for tactile feedback. -->
+    <Style Selector="Button.premium">
+      <Setter Property="Foreground" Value="{DynamicResource AccentInkBrush}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="13.5"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Padding" Value="0,12"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Color="{DynamicResource SystemAccentColorLight1}" Offset="0"/>
+          <GradientStop Color="{DynamicResource SystemAccentColor}" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border x:Name="PremiumBg" Background="{TemplateBinding Background}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  BorderBrush="{DynamicResource SystemAccentColorLight2}" BorderThickness="1">
+            <ContentPresenter Content="{TemplateBinding Content}"
+                               Foreground="{TemplateBinding Foreground}"
+                               FontWeight="{TemplateBinding FontWeight}"
+                               FontSize="{TemplateBinding FontSize}"
+                               Padding="{TemplateBinding Padding}"
+                               HorizontalContentAlignment="Center"
+                               VerticalContentAlignment="Center"/>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="Button.premium:pointerover /template/ Border#PremiumBg">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Color="{DynamicResource SystemAccentColorLight2}" Offset="0"/>
+          <GradientStop Color="{DynamicResource SystemAccentColorLight1}" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+    <Style Selector="Button.premium:pressed /template/ Border#PremiumBg">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Color="{DynamicResource SystemAccentColor}" Offset="0"/>
+          <GradientStop Color="{DynamicResource SystemAccentColorDark1}" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+
+    <!-- themed input field: Surface2/BorderBrush2 chrome instead of
+         FluentTheme's default white box, for freestanding fields that sit
+         directly on a settings row (hotkey capture, PIN) rather than inside
+         our own bordered container like the search box. -->
+    <Style Selector="TextBox.field">
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+    </Style>
+    <Style Selector="TextBox.field /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush2}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="8"/>
+    </Style>
+    <Style Selector="TextBox.field:pointerover /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+    </Style>
+    <Style Selector="TextBox.field:focus /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+      <Setter Property="BorderThickness" Value="1.4"/>
+    </Style>
   </Application.Styles>
 
   <!-- Theme-scoped resources. RequestedThemeVariant (set by ThemeService)

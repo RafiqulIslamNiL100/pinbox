@@ -20,7 +20,7 @@
       <StackPanel x:Name="GeneralPanel" Margin="20,14">
         <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
           <StackPanel Grid.Column="0"><TextBlock x:Name="HotkeyLabel" Text="Global hotkey" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextBrush}"/><TextBlock x:Name="HotkeyDesc" Text="Opens Pinbox from anywhere" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
-          <TextBox Grid.Column="1" x:Name="HotkeyBox" Width="150" FontFamily="Consolas" VerticalAlignment="Center"/>
+          <TextBox Grid.Column="1" x:Name="HotkeyBox" Classes="field" Width="150" FontFamily="Consolas" VerticalAlignment="Center"/>
         </Grid>
         <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
           <StackPanel Grid.Column="0"><TextBlock x:Name="StartupLabel" Text="Start with Windows" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextBrush}"/><TextBlock x:Name="StartupDesc" Text="Launch Pinbox on login" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
@@ -83,7 +83,7 @@
         </Grid>
         <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
           <StackPanel Grid.Column="0"><TextBlock x:Name="SetPinLabel" Text="Set PIN" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextBrush}"/><TextBlock x:Name="SetPinDesc" Text="Required if auto-lock is on" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>
-          <TextBox Grid.Column="1" x:Name="PinBox" Width="100" PasswordChar="•" MaxLength="6" VerticalAlignment="Center"/>
+          <TextBox Grid.Column="1" x:Name="PinBox" Classes="field" Width="100" PasswordChar="•" MaxLength="6" VerticalAlignment="Center"/>
         </Grid>
         <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
           <StackPanel Grid.Column="0"><TextBlock x:Name="BackupLabel" Text="Backup" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextBrush}"/><TextBlock x:Name="BackupDesc" Text="Export or import your pages and items" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/></StackPanel>

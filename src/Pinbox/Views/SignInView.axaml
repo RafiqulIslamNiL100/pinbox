@@ -21,14 +21,13 @@
       </Border>
 
       <TextBlock x:Name="EmailLabel" Text="Email" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
-      <TextBox x:Name="EmailBox" Watermark="you@example.com" Margin="0,0,0,14"/>
+      <TextBox x:Name="EmailBox" Classes="field" Watermark="you@example.com" Margin="0,0,0,14"/>
 
       <TextBlock x:Name="PasswordLabel" Text="Password" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
-      <TextBox x:Name="PasswordBox" Watermark="Your password" PasswordChar="•" Margin="0,0,0,4"/>
+      <TextBox x:Name="PasswordBox" Classes="field" Watermark="Your password" PasswordChar="•" Margin="0,0,0,4"/>
 
-      <Button x:Name="SignInButton" Content="Sign in" HorizontalAlignment="Stretch" Margin="0,16,0,0"
-              Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}"
-              FontWeight="SemiBold" Padding="0,11" CornerRadius="7" Click="OnSignInClick"/>
+      <Button x:Name="SignInButton" Content="Sign in" HorizontalAlignment="Stretch" Margin="0,20,0,0"
+              Classes="premium" Click="OnSignInClick"/>
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0" Spacing="4">
         <TextBlock x:Name="NoAccountText" Text="Don't have an account?" FontSize="12.5" Foreground="{DynamicResource TextDimBrush}"/>

@@ -21,17 +21,16 @@
       </Border>
 
       <TextBlock x:Name="NameLabel" Text="Name" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
-      <TextBox x:Name="NameBox" Watermark="Your name" Margin="0,0,0,14"/>
+      <TextBox x:Name="NameBox" Classes="field" Watermark="Your name" Margin="0,0,0,14"/>
 
       <TextBlock x:Name="EmailLabel" Text="Email" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
-      <TextBox x:Name="EmailBox" Watermark="you@example.com" Margin="0,0,0,14"/>
+      <TextBox x:Name="EmailBox" Classes="field" Watermark="you@example.com" Margin="0,0,0,14"/>
 
       <TextBlock x:Name="PasswordLabel" Text="Password" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
-      <TextBox x:Name="PasswordBox" Watermark="At least 8 characters" PasswordChar="•" Margin="0,0,0,4"/>
+      <TextBox x:Name="PasswordBox" Classes="field" Watermark="At least 8 characters" PasswordChar="•" Margin="0,0,0,4"/>
 
-      <Button x:Name="SignUpButton" Content="Create account" HorizontalAlignment="Stretch" Margin="0,16,0,0"
-              Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}"
-              FontWeight="SemiBold" Padding="0,11" CornerRadius="7" Click="OnSignUpClick"/>
+      <Button x:Name="SignUpButton" Content="Create account" HorizontalAlignment="Stretch" Margin="0,20,0,0"
+              Classes="premium" Click="OnSignUpClick"/>
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0" Spacing="4">
         <TextBlock x:Name="HaveAccountText" Text="Already have an account?" FontSize="12.5" Foreground="{DynamicResource TextDimBrush}"/>

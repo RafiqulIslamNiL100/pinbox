@@ -1,4 +1,4 @@
 {
-  "version": "2.6.0",
-  "notes": "Full Chinese translation: the EN / 中文 toggle now translates the entire interface - every screen, the Settings window, menus, buttons and prompts - not just a handful of labels. Switching language updates everything instantly, and your choice is remembered across restarts."
+  "version": "2.7.0",
+  "notes": "Premium sign-in, sign-up and activation screens with a richer gradient button style, every emoji in the app replaced with clean minimal line icons, and the Settings hotkey/PIN fields redesigned in the purple theme instead of a plain white box."
 }

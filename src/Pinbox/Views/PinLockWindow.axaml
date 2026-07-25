@@ -8,16 +8,19 @@
         Title="Pinbox — Locked">
   <StackPanel Margin="26,30" Spacing="6" HorizontalAlignment="Center">
     <Border Width="44" Height="44" CornerRadius="11" Background="{DynamicResource GoldSoftBrush}" HorizontalAlignment="Center" Margin="0,0,0,6">
-      <TextBlock Text="🔒" FontSize="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      <Path Data="M6 11V8a6 6 0 1 1 12 0v3 M5 11h14v9H5z" Stroke="{DynamicResource GoldBrush}"
+            StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round"
+            Width="18" Height="18" Stretch="Uniform"
+            HorizontalAlignment="Center" VerticalAlignment="Center"/>
     </Border>
     <TextBlock x:Name="PinTitle" Text="Enter your PIN" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
     <TextBlock x:Name="PinLede" Text="Locked after being idle." FontSize="11.5" Foreground="{DynamicResource TextDimBrush}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
 
-    <TextBox x:Name="PinInput" PasswordChar="•" MaxLength="6" HorizontalContentAlignment="Center" FontSize="18" Margin="0,0,0,8" KeyDown="OnKeyDown"/>
+    <TextBox x:Name="PinInput" Classes="field" PasswordChar="•" MaxLength="6" HorizontalContentAlignment="Center" FontSize="18" Margin="0,0,0,8" KeyDown="OnKeyDown"/>
 
     <TextBlock x:Name="ErrorText" Foreground="{DynamicResource MauveBrush}" FontSize="11.5" IsVisible="False" HorizontalAlignment="Center" Margin="0,0,0,6"/>
 
     <Button x:Name="UnlockBtn" Content="Unlock" Click="OnUnlockClick" HorizontalAlignment="Stretch" Padding="0,10"
-            Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}" FontWeight="SemiBold"/>
+            Classes="premium"/>
   </StackPanel>
 </Window>
