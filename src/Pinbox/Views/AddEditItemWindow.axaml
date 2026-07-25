@@ -8,16 +8,16 @@
   <StackPanel Margin="20" Spacing="4">
     <TextBlock x:Name="TitleText" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,10"/>
 
-    <TextBlock Text="Subject" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
+    <TextBlock x:Name="SubjectLabel" Text="Subject" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
     <TextBox x:Name="SubjectBox" Watermark="e.g. Refund policy" Margin="0,0,0,10"/>
 
-    <TextBlock Text="Type" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
+    <TextBlock x:Name="TypeLabel" Text="Type" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
     <Grid ColumnDefinitions="*,*" Margin="0,0,0,10">
       <ToggleButton x:Name="TextTypeBtn" Grid.Column="0" Content="Text" Click="OnTextTypeClick" HorizontalContentAlignment="Center"/>
       <ToggleButton x:Name="PicTypeBtn" Grid.Column="1" Content="Picture" Click="OnPicTypeClick" HorizontalContentAlignment="Center" Margin="6,0,0,0"/>
     </Grid>
 
-    <TextBlock Text="Content" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
+    <TextBlock x:Name="ContentLabel" Text="Content" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
 
     <TextBox x:Name="TextBox" AcceptsReturn="True" TextWrapping="Wrap" Height="96" FontFamily="Consolas" FontSize="12.5"/>
     <TextBlock x:Name="PlaceholderHint" FontSize="11" Foreground="{DynamicResource TextDimBrush}" Margin="0,6,0,0"
@@ -31,7 +31,7 @@
       </StackPanel>
     </Border>
 
-    <TextBlock Text="Labels" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,12,0,6"/>
+    <TextBlock x:Name="LabelsLabel" Text="Labels" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,12,0,6"/>
     <WrapPanel x:Name="LabelsPanel"/>
 
     <TextBlock x:Name="TemplateLink" Text="Start from a template…" FontSize="11.5" FontWeight="SemiBold"
@@ -43,8 +43,8 @@
 
     <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,16,0,0">
       <Button x:Name="PreviewButton" Grid.Column="0" Content="Preview image" IsVisible="False" Click="OnPreviewClick"/>
-      <Button Grid.Column="2" Content="Cancel" Click="OnCancel" Margin="0,0,8,0"/>
-      <Button Grid.Column="3" Content="Save item" Click="OnSave" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}" FontWeight="SemiBold"/>
+      <Button x:Name="CancelButton" Grid.Column="2" Content="Cancel" Click="OnCancel" Margin="0,0,8,0"/>
+      <Button x:Name="SaveButton" Grid.Column="3" Content="Save item" Click="OnSave" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentInkBrush}" FontWeight="SemiBold"/>
     </Grid>
   </StackPanel>
 </Window>

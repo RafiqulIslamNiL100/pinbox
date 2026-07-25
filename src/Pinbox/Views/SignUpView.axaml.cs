@@ -15,6 +15,23 @@ public partial class SignUpView : UserControl
     public SignUpView()
     {
         InitializeComponent();
+        ApplyLocalization();
+        Loc.LanguageChanged += ApplyLocalization;
+    }
+
+    private void ApplyLocalization()
+    {
+        TitleText.Text = Loc.T("create_account");
+        LedeText.Text = Loc.T("signup_lede2");
+        NameLabel.Text = Loc.T("name");
+        NameBox.Watermark = Loc.T("name_watermark");
+        EmailLabel.Text = Loc.T("email");
+        EmailBox.Watermark = Loc.T("email_watermark");
+        PasswordLabel.Text = Loc.T("password");
+        PasswordBox.Watermark = Loc.T("password_watermark_new");
+        SignUpButton.Content = Loc.T("create_account_btn");
+        HaveAccountText.Text = Loc.T("already_have_account");
+        GoSignIn.Text = Loc.T("sign_in");
     }
 
     private async void OnSignUpClick(object? sender, RoutedEventArgs e)

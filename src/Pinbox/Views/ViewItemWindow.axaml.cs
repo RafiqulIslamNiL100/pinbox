@@ -12,6 +12,7 @@ public partial class ViewItemWindow : Window
         InitializeComponent();
         SubjectText.Text = subject;
         BodyText.Text = body;
+        CloseBtn.Content = Pinbox.Services.Loc.T("close");
     }
 
     private void OnClose(object? sender, RoutedEventArgs e) => Close();

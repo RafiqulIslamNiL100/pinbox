@@ -34,7 +34,6 @@ public partial class AddEditItemWindow : Window
         _pageId = pageId;
         _existing = existing;
 
-        TitleText.Text = existing == null ? "Add item" : "Edit item";
         SubjectBox.Text = existing?.Subject ?? "";
 
         if (existing != null)
@@ -49,12 +48,36 @@ public partial class AddEditItemWindow : Window
 
         if (existing?.Type == ItemType.Picture)
         {
-            DropStatusText.Text = "Existing image: " + existing.ImageFileName;
+            DropStatusText.Text = existing.ImageFileName ?? "";
             PreviewButton.IsVisible = true;
         }
 
         DropZone.AddHandler(DragDrop.DropEvent, OnDrop);
         DropZone.AddHandler(DragDrop.DragOverEvent, OnDragOver);
+
+        ApplyLocalization();
+        Loc.LanguageChanged += ApplyLocalization;
+        Closed += (_, _) => Loc.LanguageChanged -= ApplyLocalization;
+    }
+
+    private void ApplyLocalization()
+    {
+        TitleText.Text = _existing == null ? Loc.T("add_item_title") : Loc.T("edit_item_title");
+        SubjectLabel.Text = Loc.T("subject");
+        SubjectBox.Watermark = Loc.T("subject_watermark");
+        TypeLabel.Text = Loc.T("type");
+        TextTypeBtn.Content = Loc.T("text");
+        PicTypeBtn.Content = Loc.T("picture");
+        ContentLabel.Text = Loc.T("content");
+        PlaceholderHint.Text = Loc.T("placeholder_hint");
+        if (_existing?.Type != ItemType.Picture || _existing.ImageFileName == null)
+            DropStatusText.Text = Loc.T("drop_image_here");
+        BrowseButton.Content = Loc.T("browse_files");
+        LabelsLabel.Text = Loc.T("labels");
+        TemplateLink.Text = Loc.T("start_from_template");
+        PreviewButton.Content = Loc.T("preview_image");
+        CancelButton.Content = Loc.T("cancel");
+        SaveButton.Content = Loc.T("save_item");
     }
 
     private void SetMode(bool picture)

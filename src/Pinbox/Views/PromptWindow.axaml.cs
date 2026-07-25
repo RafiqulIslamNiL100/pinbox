@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Pinbox.Services;
 
 namespace Pinbox.Views;
 
@@ -13,6 +14,8 @@ public partial class PromptWindow : Window
         InitializeComponent();
         PromptLabel.Text = label;
         InputBox.Text = initialValue;
+        CancelBtn.Content = Loc.T("cancel");
+        OkBtn.Content = Loc.T("ok");
         Opened += (_, _) => InputBox.Focus();
     }
 

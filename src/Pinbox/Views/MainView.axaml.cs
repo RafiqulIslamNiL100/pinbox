@@ -80,6 +80,7 @@ public partial class MainView : UserControl
         SearchBox.Watermark = Loc.T("search_items");
         AddItemButton.Content = Loc.T("add_item");
         NewPageButton.Text = Loc.T("new_page");
+        BulkDeleteText.Text = Loc.T("delete_selected");
     }
 
     // ---------------- page tabs ----------------
@@ -140,14 +141,14 @@ public partial class MainView : UserControl
         var menu = new ContextMenu();
         var items = new List<object>();
 
-        var moveLeft = new MenuItem { Header = "Move left", IsEnabled = index > 0 };
+        var moveLeft = new MenuItem { Header = Loc.T("move_left"), IsEnabled = index > 0 };
         moveLeft.Click += (_, _) => { _pages = PageStore.ReorderPage(_session!.UserId, pageId, -1); RenderPageTabs(); };
-        var moveRight = new MenuItem { Header = "Move right", IsEnabled = index < _pages.Count - 1 };
+        var moveRight = new MenuItem { Header = Loc.T("move_right"), IsEnabled = index < _pages.Count - 1 };
         moveRight.Click += (_, _) => { _pages = PageStore.ReorderPage(_session!.UserId, pageId, 1); RenderPageTabs(); };
-        var rename = new MenuItem { Header = "Rename…" };
+        var rename = new MenuItem { Header = Loc.T("rename_page") };
         rename.Click += async (_, _) =>
         {
-            var dlg = new PromptWindow("Rename page", _pages[index].Name);
+            var dlg = new PromptWindow(Loc.T("rename_page"), _pages[index].Name);
             var result = await dlg.ShowDialog<string?>(_owner);
             if (!string.IsNullOrWhiteSpace(result))
             {
@@ -155,10 +156,10 @@ public partial class MainView : UserControl
                 RenderPageTabs();
             }
         };
-        var setHotkey = new MenuItem { Header = "Set page hotkey…" };
+        var setHotkey = new MenuItem { Header = Loc.T("set_page_hotkey") };
         setHotkey.Click += async (_, _) =>
         {
-            var dlg = new PromptWindow("Page hotkey (e.g. Ctrl+Alt+1)", _pages[index].Hotkey ?? "");
+            var dlg = new PromptWindow(Loc.T("set_page_hotkey"), _pages[index].Hotkey ?? "");
             var result = await dlg.ShowDialog<string?>(_owner);
             if (result != null)
             {
@@ -166,7 +167,7 @@ public partial class MainView : UserControl
                 PageHotkeysChanged?.Invoke(this, EventArgs.Empty);
             }
         };
-        var delete = new MenuItem { Header = "Delete page", IsEnabled = _pages.Count > 1 };
+        var delete = new MenuItem { Header = Loc.T("delete_page"), IsEnabled = _pages.Count > 1 };
         delete.Click += (_, _) =>
         {
             _pages = PageStore.DeletePage(_session!.UserId, pageId);
@@ -191,7 +192,7 @@ public partial class MainView : UserControl
     private async void OnNewPageClick(object? sender, PointerPressedEventArgs e)
     {
         if (_session is null) return;
-        var dlg = new PromptWindow("New page name", "");
+        var dlg = new PromptWindow(Loc.T("new_page_name"), "");
         var result = await dlg.ShowDialog<string?>(_owner);
         if (!string.IsNullOrWhiteSpace(result))
         {
@@ -214,7 +215,7 @@ public partial class MainView : UserControl
         var page = _pages.FirstOrDefault(p => p.Id == _currentPageId);
         if (page is null)
         {
-            MsgCount.Text = "0 " + (Loc.Lang == "zh" ? "已保存项目" : "saved items");
+            MsgCount.Text = "0 " + Loc.T("saved_items_plural");
             return;
         }
 
@@ -244,7 +245,7 @@ public partial class MainView : UserControl
         {
             ItemList.Children.Add(new TextBlock
             {
-                Text = Loc.Lang == "zh" ? "还没有保存的项目。" : "No saved items yet.",
+                Text = Loc.T("no_saved_items"),
                 Foreground = Brush("TextDimBrush"),
                 FontSize = 13,
                 Margin = new Thickness(10, 40),
@@ -252,7 +253,7 @@ public partial class MainView : UserControl
             });
         }
 
-        MsgCount.Text = $"{page.Items.Count} " + (Loc.Lang == "zh" ? "已保存项目" : $"saved item{(page.Items.Count == 1 ? "" : "s")}");
+        MsgCount.Text = $"{page.Items.Count} " + Loc.T(page.Items.Count == 1 ? "saved_item_singular" : "saved_items_plural");
         UpdateBulkBar();
     }
 
@@ -643,7 +644,7 @@ public partial class MainView : UserControl
     private void UpdateBulkBar()
     {
         BulkBar.IsVisible = _multiSelect && _selectedIds.Count > 0;
-        BulkCountText.Text = $"{_selectedIds.Count} selected";
+        BulkCountText.Text = $"{_selectedIds.Count} " + (Loc.Lang == "zh" ? "已选择" : "selected");
     }
 
     private void OnBulkDeleteClick(object? sender, PointerPressedEventArgs e)

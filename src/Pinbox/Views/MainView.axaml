@@ -72,7 +72,7 @@
             Background="{DynamicResource TextBrush}" CornerRadius="10" Padding="10,8" IsVisible="False">
       <StackPanel Orientation="Horizontal" Spacing="14">
         <TextBlock x:Name="BulkCountText" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource BgBrush}" VerticalAlignment="Center"/>
-        <TextBlock Text="Delete selected" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource MauveBrush}" Cursor="Hand"
+        <TextBlock x:Name="BulkDeleteText" Text="Delete selected" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource MauveBrush}" Cursor="Hand"
                    PointerPressed="OnBulkDeleteClick" VerticalAlignment="Center"/>
       </StackPanel>
     </Border>

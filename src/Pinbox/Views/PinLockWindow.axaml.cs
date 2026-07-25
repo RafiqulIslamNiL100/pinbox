@@ -16,6 +16,9 @@ public partial class PinLockWindow : Window
     {
         InitializeComponent();
         _settings = settings;
+        PinTitle.Text = Loc.T("enter_pin");
+        PinLede.Text = Loc.T("locked_after_idle");
+        UnlockBtn.Content = Loc.T("unlock");
         Opened += (_, _) => PinInput.Focus();
     }
 

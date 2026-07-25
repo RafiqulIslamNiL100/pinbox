@@ -9,9 +9,9 @@
                HorizontalAlignment="Center" VerticalAlignment="Center"/>
       </Border>
 
-      <TextBlock Text="Welcome back" FontSize="21" FontWeight="SemiBold"
+      <TextBlock x:Name="TitleText" Text="Welcome back" FontSize="21" FontWeight="SemiBold"
                  Foreground="{DynamicResource TextBrush}" Margin="0,0,0,6"/>
-      <TextBlock Text="Sign in to load your saved messages." FontSize="13"
+      <TextBlock x:Name="LedeText" Text="Sign in to load your saved messages." FontSize="13"
                  Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,20"/>
 
       <Border x:Name="ErrorBox" Background="{DynamicResource MauveSoftBrush}" CornerRadius="7" Padding="10,8"
@@ -20,10 +20,10 @@
                    TextWrapping="Wrap"/>
       </Border>
 
-      <TextBlock Text="Email" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
+      <TextBlock x:Name="EmailLabel" Text="Email" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
       <TextBox x:Name="EmailBox" Watermark="you@example.com" Margin="0,0,0,14"/>
 
-      <TextBlock Text="Password" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
+      <TextBlock x:Name="PasswordLabel" Text="Password" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextDimBrush}" Margin="0,0,0,6"/>
       <TextBox x:Name="PasswordBox" Watermark="Your password" PasswordChar="•" Margin="0,0,0,4"/>
 
       <Button x:Name="SignInButton" Content="Sign in" HorizontalAlignment="Stretch" Margin="0,16,0,0"
@@ -31,7 +31,7 @@
               FontWeight="SemiBold" Padding="0,11" CornerRadius="7" Click="OnSignInClick"/>
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0" Spacing="4">
-        <TextBlock Text="Don't have an account?" FontSize="12.5" Foreground="{DynamicResource TextDimBrush}"/>
+        <TextBlock x:Name="NoAccountText" Text="Don't have an account?" FontSize="12.5" Foreground="{DynamicResource TextDimBrush}"/>
         <TextBlock x:Name="GoSignUp" Text="Sign up" FontSize="12.5" FontWeight="Bold"
                    Foreground="{DynamicResource AccentBrush}" Cursor="Hand" PointerPressed="OnGoSignUp"/>
       </StackPanel>

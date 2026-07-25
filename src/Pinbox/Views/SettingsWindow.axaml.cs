@@ -36,7 +36,6 @@ public partial class SettingsWindow : Window
         }
 
         AccountEmail.Text = session.Email;
-        LicenseDesc.Text = "Managed by your activation key";
 
         LangEnBtn.IsChecked = Loc.Lang != "zh";
         LangZhBtn.IsChecked = Loc.Lang == "zh";
@@ -46,6 +45,52 @@ public partial class SettingsWindow : Window
             case 15: AutoLock15Btn.IsChecked = true; break;
             default: AutoLockOffBtn.IsChecked = true; break;
         }
+
+        ApplyLocalization();
+        Loc.LanguageChanged += ApplyLocalization;
+        Closed += (_, _) => Loc.LanguageChanged -= ApplyLocalization;
+    }
+
+    private void ApplyLocalization()
+    {
+        TitleText.Text = Loc.T("settings");
+        GeneralTabBtn.Content = Loc.T("general");
+        AccountTabBtn.Content = Loc.T("account_data");
+
+        HotkeyLabel.Text = Loc.T("global_hotkey");
+        HotkeyDesc.Text = Loc.T("desc_hotkey");
+        StartupLabel.Text = Loc.T("start_with_windows");
+        StartupDesc.Text = Loc.T("desc_startup");
+        CompactLabel.Text = Loc.T("compact_mode");
+        CompactDesc.Text = Loc.T("desc_compact");
+        NotifLabel.Text = Loc.T("notifications");
+        NotifDesc.Text = Loc.T("desc_notifications");
+        ThemeLabel.Text = Loc.T("theme");
+        ThemeDesc.Text = Loc.T("desc_theme");
+        ThemeLightBtn.Content = Loc.T("light");
+        ThemeDarkBtn.Content = Loc.T("dark");
+        ThemeSystemBtn.Content = Loc.T("system");
+        SaveGeneralBtn.Content = Loc.T("save");
+
+        LicenseLabel.Text = Loc.T("license");
+        LicenseDesc.Text = Loc.T("desc_license");
+        LicenseBadge.Text = Loc.T("active");
+        AccountLabel.Text = Loc.T("account");
+        SignOutBtn.Content = Loc.T("sign_out");
+        LanguageLabel.Text = Loc.T("language");
+        LanguageDesc.Text = Loc.T("desc_language");
+        AutoLockLabel.Text = Loc.T("auto_lock");
+        AutoLockDesc.Text = Loc.T("desc_autolock");
+        AutoLockOffBtn.Content = Loc.T("off");
+        AutoLock5Btn.Content = Loc.T("autolock_5");
+        AutoLock15Btn.Content = Loc.T("autolock_15");
+        SetPinLabel.Text = Loc.T("set_pin");
+        SetPinDesc.Text = Loc.T("desc_setpin");
+        BackupLabel.Text = Loc.T("backup");
+        BackupDesc.Text = Loc.T("desc_backup");
+        ExportBtn.Content = Loc.T("export");
+        ImportBtn.Content = Loc.T("import");
+        SaveAccountBtn.Content = Loc.T("save");
     }
 
     private void OnGeneralTabClick(object? sender, RoutedEventArgs e)

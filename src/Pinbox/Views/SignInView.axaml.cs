@@ -15,6 +15,21 @@ public partial class SignInView : UserControl
     public SignInView()
     {
         InitializeComponent();
+        ApplyLocalization();
+        Loc.LanguageChanged += ApplyLocalization;
+    }
+
+    private void ApplyLocalization()
+    {
+        TitleText.Text = Loc.T("welcome_back");
+        LedeText.Text = Loc.T("signin_lede2");
+        EmailLabel.Text = Loc.T("email");
+        EmailBox.Watermark = Loc.T("email_watermark");
+        PasswordLabel.Text = Loc.T("password");
+        PasswordBox.Watermark = Loc.T("password_watermark");
+        SignInButton.Content = Loc.T("sign_in");
+        NoAccountText.Text = Loc.T("dont_have_account");
+        GoSignUp.Text = Loc.T("sign_up");
     }
 
     private async void OnSignInClick(object? sender, RoutedEventArgs e)
