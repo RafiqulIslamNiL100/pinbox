@@ -263,7 +263,7 @@ function renderUsers() {
       <thead>
         <tr>
           <th>Name</th><th>Email</th><th>Created via</th><th>Status</th>
-          <th>Key</th><th>Key expires</th><th>Last seen</th><th>Actions</th>
+          <th>Key</th><th>Key expires</th><th>Device</th><th>Last seen</th><th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -275,12 +275,14 @@ function renderUsers() {
             <td><span class="pill ${u.status}">${u.status}</span></td>
             <td class="code-cell">${escapeHtml(u.redeemed_key_code || '—')}</td>
             <td>${u.key_expires_at ? fmtDate(u.key_expires_at) : (u.redeemed_key_code ? 'Never' : '—')}</td>
+            <td>${escapeHtml(u.device_label || (u.device_id ? 'Unnamed device' : '—'))}</td>
             <td>${fmtDate(u.last_seen)}</td>
             <td>
               <div class="actions">
                 ${u.status !== 'active' ? `<button class="good" onclick="setUserStatus('${u.id}','active')">Activate</button>` : ''}
                 ${u.status !== 'restricted' ? `<button class="warn" onclick="setUserStatus('${u.id}','restricted')">Restrict</button>` : ''}
                 ${u.status !== 'banned' ? `<button class="danger" onclick="setUserStatus('${u.id}','banned')">Ban</button>` : ''}
+                ${u.device_id ? `<button class="warn" onclick="clearDevice('${u.id}')">Sign out device</button>` : ''}
                 <button class="danger" onclick="deleteUser('${u.id}','${escapeHtml(u.email)}')">Delete</button>
               </div>
             </td>
@@ -294,6 +296,14 @@ function renderUsers() {
 
 async function setUserStatus(id, status) {
   const { error } = await db.from('profiles').update({ status }).eq('id', id);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await loadUsers();
+}
+
+// Frees up the account's device slot so any device can claim it again on
+// its next sign-in - useful if a user lost access to their original device.
+async function clearDevice(id) {
+  const { error } = await db.from('profiles').update({ device_id: null, device_label: null }).eq('id', id);
   if (error) { alert('Failed: ' + error.message); return; }
   await loadUsers();
 }

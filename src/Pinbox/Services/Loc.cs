@@ -184,6 +184,7 @@ public static class Loc
         ["key_expired_lede"] = ("Enter a new key to keep using Pinbox.", "输入新密钥以继续使用 Pinbox。"),
         ["access_unavailable"] = ("Access unavailable", "无法访问"),
         ["enter_key_first"] = ("Enter a key first.", "请先输入密钥。"),
+        ["signed_out_other_device"] = ("This account was signed in on another device. Sign in again to use Pinbox here.", "此账户已在另一台设备上登录。请重新登录以在此设备上使用 Pinbox。"),
     };
 
     public static string T(string key)

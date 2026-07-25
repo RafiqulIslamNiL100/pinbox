@@ -9,4 +9,5 @@ public class AppSettings
     public string Theme { get; set; } = "System"; // Light, Dark, System
     public int AutoLockMinutes { get; set; } // 0 = off
     public string? PinHash { get; set; }
+    public string? DeviceId { get; set; }
 }

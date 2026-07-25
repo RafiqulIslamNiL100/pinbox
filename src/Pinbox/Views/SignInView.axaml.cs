@@ -63,4 +63,12 @@ public partial class SignInView : UserControl
         PasswordBox.Text = "";
         ErrorBox.IsVisible = false;
     }
+
+    // Used to explain a local sign-out the user didn't ask for right now
+    // (e.g. another device just claimed this account's single device slot).
+    public void ShowMessage(string text)
+    {
+        ErrorText.Text = text;
+        ErrorBox.IsVisible = true;
+    }
 }

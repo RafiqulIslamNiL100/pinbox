@@ -58,10 +58,19 @@ public partial class MainWindow : Window
         _session = session;
         AuthService.SaveSession(session);
 
-        var status = await SafeCheckLicenseAsync();
+        // An explicit sign-in/sign-up claims this device as the account's
+        // single active device, signing out any other device using it.
+        var status = await SafeCheckLicenseAsync(claim: true);
         if (status is { Ok: true })
         {
             await EnterMainAsync();
+        }
+        else if (status is { Reason: "device_mismatch" })
+        {
+            // Only possible if another device claimed the slot in the
+            // instant between this device's claim attempt and now - treat
+            // it the same as any other device takeover.
+            HandleDeviceMismatch();
         }
         else
         {
@@ -70,12 +79,12 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task<LicenseStatus?> SafeCheckLicenseAsync()
+    private async Task<LicenseStatus?> SafeCheckLicenseAsync(bool claim = false)
     {
         if (_session is null) return null;
         try
         {
-            return await LicenseService.CheckLicenseAsync(_session);
+            return await LicenseService.CheckLicenseAsync(_session, claim);
         }
         catch
         {
@@ -105,6 +114,8 @@ public partial class MainWindow : Window
         }
 
         _session = saved;
+        // A resumed session never claims the device - it only confirms
+        // this device still holds the account's single active slot.
         var status = await SafeCheckLicenseAsync();
 
         if (status is null)
@@ -116,6 +127,10 @@ public partial class MainWindow : Window
         else if (status.Ok)
         {
             await EnterMainAsync();
+        }
+        else if (status.Reason == "device_mismatch")
+        {
+            HandleDeviceMismatch();
         }
         else
         {
@@ -134,11 +149,26 @@ public partial class MainWindow : Window
             if (status is { Ok: false } && _session is not null)
             {
                 _licenseTimer?.Stop();
-                ActivateKeyViewControl.SetSession(_session, status.Reason);
-                ShowScreen("activate");
+                if (status.Reason == "device_mismatch")
+                    HandleDeviceMismatch();
+                else
+                {
+                    ActivateKeyViewControl.SetSession(_session, status.Reason);
+                    ShowScreen("activate");
+                }
             }
         };
         _licenseTimer.Start();
+    }
+
+    // Another device has taken over the account's single device slot -
+    // sign out locally (this device never had it taken by force, it just
+    // stops being allowed to use it) and explain why, so the user isn't
+    // left wondering why they were dropped back to the sign-in screen.
+    private void HandleDeviceMismatch()
+    {
+        DoSignOut();
+        SignInViewControl.ShowMessage(Loc.T("signed_out_other_device"));
     }
 
     private void DoSignOut()

@@ -28,6 +28,9 @@ verification step — the activation key is the real gate, not the email.
   click **Run**.
 - You should see "Success. No rows returned." — that's correct, it just
   created the tables and functions.
+- The whole file is safe to paste and run again any time it's updated
+  (e.g. after pulling a newer version of the app) - every statement only
+  creates or alters what's missing, it won't touch your existing data.
 
 ## 4. Get your keys
 
