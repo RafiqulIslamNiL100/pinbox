@@ -74,7 +74,6 @@ public partial class AddEditItemWindow : Window
             DropStatusText.Text = Loc.T("drop_image_here");
         BrowseButton.Content = Loc.T("browse_files");
         LabelsLabel.Text = Loc.T("labels");
-        TemplateLink.Text = Loc.T("start_from_template");
         PreviewButton.Content = Loc.T("preview_image");
         CancelButton.Content = Loc.T("cancel");
         SaveButton.Content = Loc.T("save_item");
@@ -87,7 +86,6 @@ public partial class AddEditItemWindow : Window
         PicTypeBtn.IsChecked = picture;
         TextBox.IsVisible = !picture;
         PlaceholderHint.IsVisible = !picture;
-        TemplateLink.IsVisible = !picture;
         DropZone.IsVisible = picture;
         PreviewButton.IsVisible = picture && (_pendingImagePath != null || _existing?.ImageFileName != null);
     }
@@ -127,25 +125,6 @@ public partial class AddEditItemWindow : Window
             };
             LabelsPanel.Children.Add(chip);
         }
-    }
-
-    private void OnTemplateClick(object? sender, PointerPressedEventArgs e)
-    {
-        var flyout = new Flyout();
-        var panel = new StackPanel { Spacing = 2, Margin = new Thickness(4) };
-        foreach (var tmpl in TemplateService.Templates)
-        {
-            var item = new TextBlock { Text = tmpl.Subject, Padding = new Thickness(8, 6), Cursor = new Cursor(StandardCursorType.Hand) };
-            item.PointerPressed += (_, _) =>
-            {
-                SubjectBox.Text = tmpl.Subject;
-                TextBox.Text = tmpl.Text;
-                flyout.Hide();
-            };
-            panel.Children.Add(item);
-        }
-        flyout.Content = panel;
-        flyout.ShowAt(TemplateLink);
     }
 
     private void OnDragOver(object? sender, DragEventArgs e)

@@ -1,4 +1,4 @@
 {
-  "version": "2.8.0",
-  "notes": "Your activation key now only works on one device at a time. Signing in on a new device automatically signs the account out on any other device using it, with a clear message explaining why. The admin dashboard shows which device is active on each account and can free up the device slot remotely. Requires re-running the updated backend/schema.sql in your Supabase SQL editor to take effect."
+  "version": "2.8.1",
+  "notes": "Removed the Templates picker from Add item and the search bar from the main list, simplifying the toolbar down to multi-select and Add item."
 }
