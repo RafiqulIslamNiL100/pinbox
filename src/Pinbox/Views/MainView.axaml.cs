@@ -78,6 +78,7 @@ public partial class MainView : UserControl
 
     private void ApplyLocalization()
     {
+        SearchBox.Watermark = Loc.T("search_items");
         AddItemButton.Content = Loc.T("add_item");
         NewPageButton.Text = Loc.T("new_page");
         BulkDeleteText.Text = Loc.T("delete_selected");
@@ -207,6 +208,8 @@ public partial class MainView : UserControl
 
     // ---------------- item list ----------------
 
+    private void OnSearchChanged(object? sender, TextChangedEventArgs e) => RenderItems();
+
     private void RenderItems()
     {
         ItemList.Children.Clear();
@@ -217,8 +220,16 @@ public partial class MainView : UserControl
             return;
         }
 
-        var pinned = page.Items.Where(i => i.IsFavorite).ToList();
-        var rest = page.Items.Where(i => !i.IsFavorite).ToList();
+        var query = (SearchBox.Text ?? "").Trim().ToLowerInvariant();
+        var filtered = page.Items.Where(i =>
+            string.IsNullOrEmpty(query) ||
+            i.Subject.ToLowerInvariant().Contains(query) ||
+            i.Text.ToLowerInvariant().Contains(query) ||
+            i.Labels.Any(l => l.ToLowerInvariant().Contains(query))
+        ).ToList();
+
+        var pinned = filtered.Where(i => i.IsFavorite).ToList();
+        var rest = filtered.Where(i => !i.IsFavorite).ToList();
 
         if (pinned.Count > 0)
         {
@@ -231,7 +242,7 @@ public partial class MainView : UserControl
             foreach (var item in rest) ItemList.Children.Add(BuildRow(page, item));
         }
 
-        if (page.Items.Count == 0)
+        if (filtered.Count == 0)
         {
             ItemList.Children.Add(new TextBlock
             {

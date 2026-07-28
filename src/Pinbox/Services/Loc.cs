@@ -80,6 +80,7 @@ public static class Loc
         ["saved_items"] = ("Saved items", "已保存项目"),
         ["add_item"] = ("+ Add item", "+ 添加项目"),
         ["new_page"] = ("+ New page", "+ 新建页面"),
+        ["search_items"] = ("Search items…", "搜索项目…"),
         ["pinned"] = ("Pinned", "已置顶"),
         ["all_items"] = ("All items", "全部项目"),
         ["edit"] = ("Edit", "编辑"),
@@ -119,6 +120,7 @@ public static class Loc
         ["locked_after_idle"] = ("Locked after being idle.", "空闲后已锁定。"),
         ["drag_drop_hint"] = ("Drag & drop an image here, or browse files", "将图片拖放到此处，或浏览文件"),
         ["preview_image"] = ("Preview image", "预览图片"),
+        ["start_from_template"] = ("Start from a template…", "从模板开始…"),
         ["window_locked_title"] = ("Pinbox is locked", "Pinbox 已锁定"),
         ["renew_to_continue"] = ("Renew your key to keep using Pinbox.", "续订您的密钥以继续使用 Pinbox。"),
 
