@@ -63,8 +63,12 @@ alter table public.profiles enable row level security;
 alter table public.activation_keys enable row level security;
 
 -- Users can see and update only their own profile row.
+-- (Postgres has no "create policy if not exists", so drop first to stay
+-- idempotent on a re-run.)
+drop policy if exists "profiles: read own" on public.profiles;
 create policy "profiles: read own" on public.profiles
   for select using (auth.uid() = id);
+drop policy if exists "profiles: update own" on public.profiles;
 create policy "profiles: update own" on public.profiles
   for update using (auth.uid() = id);
 
