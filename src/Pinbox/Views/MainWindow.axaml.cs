@@ -30,7 +30,11 @@ public partial class MainWindow : Window
         SignUpViewControl.SignedUp += async (_, session) => await OnAuthenticated(session);
         SignUpViewControl.GoToSignIn += (_, _) => ShowScreen("signin");
 
-        ActivateKeyViewControl.Activated += async (_, _) => await EnterMainAsync();
+        ActivateKeyViewControl.Activated += async (_, _) =>
+        {
+            RecordLicenseResult(true);
+            await EnterMainAsync();
+        };
         ActivateKeyViewControl.SignOutRequested += (_, _) => DoSignOut();
 
         MainViewControl.Initialize(this);
@@ -63,6 +67,7 @@ public partial class MainWindow : Window
         var status = await SafeCheckLicenseAsync(claim: true);
         if (status is { Ok: true })
         {
+            RecordLicenseResult(true);
             await EnterMainAsync();
         }
         else if (status is { Reason: "device_mismatch" })
@@ -74,6 +79,11 @@ public partial class MainWindow : Window
         }
         else
         {
+            // Includes the network-unreachable (status is null) case: a
+            // brand-new sign-in has no prior verified license to fall back
+            // on, so it must reach the server at least once before it can
+            // be let in - no offline grace period on first sign-in.
+            RecordLicenseResult(false);
             ActivateKeyViewControl.SetSession(session, status?.Reason);
             ShowScreen("activate");
         }
@@ -93,6 +103,17 @@ public partial class MainWindow : Window
             // connection. Caller decides what to do with a null result.
             return null;
         }
+    }
+
+    // Persists whether the server has ever confirmed this account holds a
+    // valid license, so a later launch can tell a genuine "can't reach the
+    // server right now" apart from "this account was never licensed" when
+    // deciding whether to extend offline grace.
+    private void RecordLicenseResult(bool ok)
+    {
+        if (_session is null) return;
+        _session.LicenseVerifiedOk = ok;
+        AuthService.SaveSession(_session);
     }
 
     private async Task EnterMainAsync()
@@ -120,12 +141,24 @@ public partial class MainWindow : Window
 
         if (status is null)
         {
-            // Couldn't reach the server right now - let them in with what we
-            // last knew rather than blocking on a network hiccup.
-            await EnterMainAsync();
+            // Couldn't reach the server right now. Only let them in if a
+            // previous launch actually confirmed a valid license for this
+            // account - otherwise a saved-but-never-activated session
+            // could get full access just by being offline, which defeats
+            // the activation-key gate entirely.
+            if (saved.LicenseVerifiedOk)
+            {
+                await EnterMainAsync();
+            }
+            else
+            {
+                ActivateKeyViewControl.SetSession(_session, null);
+                ShowScreen("activate");
+            }
         }
         else if (status.Ok)
         {
+            RecordLicenseResult(true);
             await EnterMainAsync();
         }
         else if (status.Reason == "device_mismatch")
@@ -134,6 +167,7 @@ public partial class MainWindow : Window
         }
         else
         {
+            RecordLicenseResult(false);
             ActivateKeyViewControl.SetSession(_session, status.Reason);
             ShowScreen("activate");
         }
@@ -146,13 +180,18 @@ public partial class MainWindow : Window
         _licenseTimer.Tick += async (_, _) =>
         {
             var status = await SafeCheckLicenseAsync();
-            if (status is { Ok: false } && _session is not null)
+            if (status is { Ok: true })
+            {
+                RecordLicenseResult(true);
+            }
+            else if (status is { Ok: false } && _session is not null)
             {
                 _licenseTimer?.Stop();
                 if (status.Reason == "device_mismatch")
                     HandleDeviceMismatch();
                 else
                 {
+                    RecordLicenseResult(false);
                     ActivateKeyViewControl.SetSession(_session, status.Reason);
                     ShowScreen("activate");
                 }

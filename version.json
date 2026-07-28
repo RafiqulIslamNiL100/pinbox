@@ -1,4 +1,4 @@
 {
-  "version": "2.8.2",
-  "notes": "Reverted the previous update: the Templates picker in Add item and the search bar in the main list are both back."
+  "version": "2.8.3",
+  "notes": "Security fix: closes a gap where a saved sign-in with no activation key could reach the main app if the license check failed to reach the server (e.g. offline). Only a session the server has actually confirmed as licensed gets that offline grace period now - an unverified session is always sent to the activation screen."
 }
